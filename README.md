@@ -21,7 +21,14 @@ First install the UK_Biobank Python Conda Environment using `bb_python/python_in
 
 *. init_vars*
 
-This will activate the UKBB Conda environment. We can then run the pipeline on theconverted NIFTIs using `bb_pipeline.py` from the bb_pipeline_tools folder. The pipeline assumes NIFTI inputs with a specific filename convention. 
+This will activate the UKBB Conda environment. We can then run the pipeline. The pipeline assumes NIFTI inputs with a specific filename convention. 
 Therefore, perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is
 
 *dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o ../  $DICOMFolder*
+
+Ocne NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
+
+*bb_pipeline.py subjectFolder*
+
+where subjectFolder contains the input NIFTI files
+
