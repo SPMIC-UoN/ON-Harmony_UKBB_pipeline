@@ -25,7 +25,9 @@ This will activate the UKBB Conda environment. We can then run the pipeline. Ocn
 
 *bb_pipeline.py subjectFolder*
 
-where subjectFolder contains the input NIFTI files for a given subject. Notice that the current version of the pipeline expects that subjectFolder is within the parent UKB-pipeline directory (i.e. within $BBDIR)
+where subjectFolder contains the input NIFTI files for a given subject. Notice that the current version of the pipeline expects that subjectFolder is within the parent UKB-pipeline directory (i.e. within $BBDIR).
+
+Notice that the original version performs *gradient non-linearity corrections* on the data using scanner-specific files. In this version, we have turned off the grad-nonlin corrections.
 
 
 Input Requirements
