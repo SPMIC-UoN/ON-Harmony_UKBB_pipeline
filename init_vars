@@ -71,5 +71,9 @@ export PYTHONPATH=$BB_BIN_DIR/bb_python/bb_python:$PYTHONPATH
 #INCLUDE 3 MAIN BIOBANK DIRECTORIES IN PATH
 export PATH=$BB_BIN_DIR/bb_pipeline_tools/:$BB_BIN_DIR/bb_general_tools/:$PATH
 
+#ACTIVATE MATLAB'S RUNTIME COMPILER
+MCRROOT="/usr/local/mcr/v93"                                                #TO BE MODIFIED BY USER
+export LD_LIBRARY_PATH=${MCRROOT}/runtime/glnxa64:${MCRROOT}/bin/glnxa64:${MCRROOT}/sys/os/glnxa64:$LD_LIBRARY_PATH
+
 #ACTIVATE BIOBANK'S PYTHON VERSION
 . $BB_BIN_DIR/bb_python/bb_python/bin/activate
