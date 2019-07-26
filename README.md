@@ -21,13 +21,15 @@ First install the UK_Biobank Python Conda Environment by going into the `bb_pyth
 
 *. init_vars*
 
-This will activate the UKBB Conda environment. We can then run the pipeline. Ocne NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
+This will activate the UKBB Conda environment. We can then run the pipeline. Once NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
 
 *bb_pipeline.py subjectFolder*
 
 where subjectFolder contains the input NIFTI files for a given subject. Notice that the current version of the pipeline expects that subjectFolder is within the parent UKB-pipeline directory (i.e. within $BBDIR).
 
 Notice that the original version performs *gradient non-linearity corrections* on the data using scanner-specific files. In this version, we have turned off the grad-nonlin corrections.
+
+Finally, make sure to add the following three files with `pre-trained models (for BIANCA and FIX)`, following the instructions from https://www.fmrib.ox.ac.uk/ukbiobank/fbp.
 
 
 Input Requirements
