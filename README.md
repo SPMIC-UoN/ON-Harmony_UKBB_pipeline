@@ -38,5 +38,5 @@ The pipeline assumes NIFTI inputs with a specific filename convention. Therefore
 The `minimum input` required to run the pipeline is a T1w image. The pipelines for each modality have their own expectations.
 
 
-*  **T1w Input**: Ideally a T1w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. 
-*  **T2w Input**: Ideally a T2w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. 
+*  **T1w Input**: Ideally a T1w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. Also, the corresponding .json file should have a value "NORM" amongst the values for entry "ImageType".
+*  **T2w Input**: Ideally a T2w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. Also, the corresponding .json file should have a value "NORM" amongst the values for entry "ImageType".
