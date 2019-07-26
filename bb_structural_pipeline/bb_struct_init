@@ -102,7 +102,7 @@ mv *MNI* transforms
 mv *_to_* transforms
 mv transforms/T1_brain_to_MNI.nii.gz .
 
-cd $1
+cd ..
 
 #Warping for T2_FLAIR
 if [ `${FSLDIR}/bin/imtest T2_FLAIR/T2_FLAIR` = 0 ] ; then
