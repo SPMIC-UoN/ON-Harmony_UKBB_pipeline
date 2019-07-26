@@ -116,7 +116,8 @@ else
     fi
 
     #Gradient Distortion Unwarp
-    $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz
+    #$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz
+    ${FSLDIR}/bin/imcp T2_FLAIR_orig T2_FLAIR_orig_ud
 
     #Take T2 to T1 and also the brain mask
     ${FSLDIR}/bin/flirt -in T2_FLAIR_orig_ud -ref ../T1/T1_orig_ud -out T2_FLAIR_tmp -omat T2_FLAIR_tmp.mat -dof 6
@@ -131,7 +132,8 @@ else
     cp ../T1/transforms/T1_to_MNI_linear.mat T2_FLAIR_to_MNI_linear.mat 
 
     #Generate the non-linearly warped T2 in MNI (Needed for post-freesurfer processing)
-    ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T2_FLAIR_orig_ud_warp --midmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
+    #${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T2_FLAIR_orig_ud_warp --midmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
+    ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
     ${FSLDIR}/bin/applywarp --rel  -i T2_FLAIR_orig -r $FSLDIR/data/standard/MNI152_T1_1mm -w T2_FLAIR_orig_to_MNI_warp -o T2_FLAIR_brain_to_MNI --interp=spline
     ${FSLDIR}/bin/fslmaths T2_FLAIR_brain_to_MNI -mul $templ/MNI152_T1_1mm_brain_mask T2_FLAIR_brain_to_MNI
 
