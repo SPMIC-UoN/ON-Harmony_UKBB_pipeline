@@ -21,4 +21,4 @@ Documentation
 
 *dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o ../  $DICOMFolder*
 
-We can then run the pipeline on theconverted NIFTIs using `bb_pipeline.py` from the bb_pipeline_tools folder.
+We can then run the pipeline on theconverted NIFTIs using `bb_pipeline.py` from the bb_pipeline_tools folder. Before doing so, make sure to set the paths in the `init_vars` script.
