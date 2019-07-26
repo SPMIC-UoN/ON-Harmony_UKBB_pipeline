@@ -123,7 +123,8 @@ else
     ${FSLDIR}/bin/flirt -in T2_FLAIR_orig_ud -ref ../T1/T1_orig_ud -out T2_FLAIR_tmp -omat T2_FLAIR_tmp.mat -dof 6
     ${FSLDIR}/bin/convert_xfm -omat T2_FLAIR_tmp2.mat -concat ../T1/transforms/T1_orig_ud_to_T1.mat  T2_FLAIR_tmp.mat
     ${FSLDIR}/bin/flirt -in T2_FLAIR_orig_ud -ref ../T1/T1_brain -refweight ../T1/T1_brain_mask -nosearch -init T2_FLAIR_tmp2.mat -omat T2_FLAIR_orig_ud_to_T2_FLAIR.mat -dof 6
-    ${FSLDIR}/bin/applywarp --rel  -i T2_FLAIR_orig -r ../T1/T1_brain -o T2_FLAIR -w T2_FLAIR_orig_ud_warp --postmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --interp=spline
+    #${FSLDIR}/bin/applywarp --rel  -i T2_FLAIR_orig -r ../T1/T1_brain -o T2_FLAIR -w T2_FLAIR_orig_ud_warp --postmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --interp=spline
+    ${FSLDIR}/bin/applywarp --rel  -i T2_FLAIR_orig -r ../T1/T1_brain -o T2_FLAIR --postmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --interp=spline
     cp ../T1/T1_brain_mask.nii.gz T2_FLAIR_brain_mask.nii.gz
     ${FSLDIR}/bin/fslmaths T2_FLAIR -mul T2_FLAIR_brain_mask T2_FLAIR_brain
 
