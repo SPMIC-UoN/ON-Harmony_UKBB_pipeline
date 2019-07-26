@@ -30,5 +30,5 @@ Ocne NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in
 
 *bb_pipeline.py subjectFolder*
 
-where subjectFolder contains the input NIFTI files
+where subjectFolder contains the input NIFTI files for a given subject.
 
