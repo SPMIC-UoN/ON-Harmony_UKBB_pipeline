@@ -21,14 +21,22 @@ First install the UK_Biobank Python Conda Environment by going into the `bb_pyth
 
 *. init_vars*
 
-This will activate the UKBB Conda environment. We can then run the pipeline. The pipeline assumes NIFTI inputs with a specific filename convention. 
-Therefore, perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is
-
-*dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o ../  $DICOMFolder*
-
-Ocne NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
+This will activate the UKBB Conda environment. We can then run the pipeline. Ocne NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
 
 *bb_pipeline.py subjectFolder*
 
 where subjectFolder contains the input NIFTI files for a given subject. Notice that the current version of the pipeline expects that subjectFolder is within the parent UKB-pipeline directory (i.e. within $BBDIR)
 
+
+Input Requirements
+------------------
+
+The pipeline assumes NIFTI inputs with a specific filename convention. Therefore, it is recommended to perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is:
+
+*dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o ../  $DICOMFolder*
+
+The `minimum input` required to run the pipeline is a T1w image. The pipelines for each modality have their own expectations.
+
+
+*  **T1w Input**: Ideally a T1w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. 
+*  **T2w Input**: Ideally a T2w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. 
