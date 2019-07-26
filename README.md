@@ -17,7 +17,7 @@ Documentation
 
 `UK_biobank_pipeline` is explained in detail in the paper [Image Processing and Quality Control for the first 10,000 Brain Imaging Datasets from UK Biobank](http://www.biorxiv.org/content/early/2017/04/24/130385).
 
-First install the UK_Biobank Python Conda Environment using `bb_python/python_installation/install_bb_python.sh` (which by default installs the recommended python 3.5.1). Then, set the paths in the `init_vars` script and source it.
+First install the UK_Biobank Python Conda Environment by going into the `bb_python/python_installation` directory and calling `./install_bb_python.sh` (which by default installs the recommended python 3.5.1). Then, set the paths in the `init_vars` script and source it.
 
 *. init_vars*
 
