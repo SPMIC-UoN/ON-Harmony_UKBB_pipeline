@@ -72,8 +72,9 @@ ${FSLDIR}/bin/flirt -in $1/T1/T1_brain_mask_dil.nii.gz -ref $1/fieldmap/fieldmap
 ${FSLDIR}/bin/fslmaths $1/fieldmap/fieldmap_mask_ud.nii.gz -thr 0.25 -bin -fillh $1/fieldmap/fieldmap_mask_ud.nii.gz
 
 #Warp the dilated T1 brain mask to the Gradient Distorted space by inverting the 
-${FSLDIR}/bin/invwarp --ref=$1/fieldmap/fieldmap_iout_mean.nii.gz -w $1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz -o $1/fieldmap/fieldmap_iout_mean_ud_inv_warp.nii.gz
-${FSLDIR}/bin/applywarp --rel -i $1/T1/T1_brain_mask_dil.nii.gz -r $1/fieldmap/fieldmap_iout_mean.nii.gz -o $1/fieldmap/fieldmap_mask.nii.gz --premat=$1/fieldmap/T1_to_fieldmap_iout.mat -w $1/fieldmap/fieldmap_iout_mean_ud_inv_warp.nii.gz   --interp=trilinear
+#${FSLDIR}/bin/invwarp --ref=$1/fieldmap/fieldmap_iout_mean.nii.gz -w $1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz -o $1/fieldmap/fieldmap_iout_mean_ud_inv_warp.nii.gz
+#${FSLDIR}/bin/applywarp --rel -i $1/T1/T1_brain_mask_dil.nii.gz -r $1/fieldmap/fieldmap_iout_mean.nii.gz -o $1/fieldmap/fieldmap_mask.nii.gz --premat=$1/fieldmap/T1_to_fieldmap_iout.mat -w $1/fieldmap/fieldmap_iout_mean_ud_inv_warp.nii.gz   --interp=trilinear
+${FSLDIR}/bin/applywarp --rel -i $1/T1/T1_brain_mask_dil.nii.gz -r $1/fieldmap/fieldmap_iout_mean.nii.gz -o $1/fieldmap/fieldmap_mask.nii.gz --premat=$1/fieldmap/T1_to_fieldmap_iout.mat --interp=trilinear
 ${FSLDIR}/bin/fslmaths $1/fieldmap/fieldmap_mask.nii.gz -thr 0.25 -bin -fillh $1/fieldmap/fieldmap_mask.nii.gz
 
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
