@@ -45,7 +45,8 @@ ${FSLDIR}/bin/fslmaths $1/fieldmap/fieldmap_iout.nii.gz -Tmean $1/fieldmap/field
 
 
 #GDC to iout_mean
-$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$1/fieldmap//fieldmap_iout_GDC/ --in=$1/fieldmap/fieldmap_iout_mean.nii.gz --out=$1/fieldmap/fieldmap_iout_mean_ud.nii.gz --owarp=$1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz
+#$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$1/fieldmap//fieldmap_iout_GDC/ --in=$1/fieldmap/fieldmap_iout_mean.nii.gz --out=$1/fieldmap/fieldmap_iout_mean_ud.nii.gz --owarp=$1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz
+${FSLDIR}/bin/imcp $1/fieldmap/fieldmap_iout_mean.nii.gz $1/fieldmap/fieldmap_iout_mean_ud.nii.gz
 #TODO: This was the previous copy. The geometry is exactly the same for B0_AP and fieldmap_iout_mean -- fslcpgeom $1/fieldmap/fieldmap_iout_mean.nii.gz $1/fieldmap/fieldmap_fout.nii.gz
 ${FSLDIR}/bin/fslcpgeom $1/fieldmap/B0_AP.nii.gz $1/fieldmap/fieldmap_fout.nii.gz
 
@@ -55,7 +56,8 @@ ${FSLDIR}/bin/imrm *_tmp.nii.gz
 
 # Get the topup iout (magnitude) to struct space and apply the transformation to fout (fieldmap)
 $BB_BIN_DIR/bb_structural_pipeline/bb_epi_reg --epi=$1/fieldmap/fieldmap_iout_mean_ud.nii.gz --t1=$1/T1/T1.nii.gz --t1brain=$1/T1/T1_brain.nii.gz --out=$1/fieldmap/fieldmap_iout_to_T1 --wmseg=$1/T1/T1_fast/T1_brain_WM_mask.nii.gz
-${FSLDIR}/bin/applywarp --rel -i $1/fieldmap/fieldmap_fout.nii.gz -r $1/T1/T1.nii.gz -o $1/fieldmap/fieldmap_fout_to_T1 -w $1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz  --postmat=$1/fieldmap/fieldmap_iout_to_T1.mat --interp=spline
+#${FSLDIR}/bin/applywarp --rel -i $1/fieldmap/fieldmap_fout.nii.gz -r $1/T1/T1.nii.gz -o $1/fieldmap/fieldmap_fout_to_T1 -w $1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz  --postmat=$1/fieldmap/fieldmap_iout_to_T1.mat --interp=spline
+${FSLDIR}/bin/applywarp --rel -i $1/fieldmap/fieldmap_fout.nii.gz -r $1/T1/T1.nii.gz -o $1/fieldmap/fieldmap_fout_to_T1 --postmat=$1/fieldmap/fieldmap_iout_to_T1.mat --interp=spline
 
 # Mask the warped fout (fieldmap) using T1 brain mask
 ${FSLDIR}/bin/fslmaths $1/fieldmap/fieldmap_fout_to_T1 -mul $1/T1/T1_brain_mask.nii.gz $1/fieldmap/fieldmap_fout_to_T1_brain.nii.gz
