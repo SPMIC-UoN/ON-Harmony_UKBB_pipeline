@@ -21,7 +21,7 @@
 # limitations under the License.
 #
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+#. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header   #For some reason, if this is sourced, fsl_sub returns no id and the subsequent topup call does not run in the structural pipeline
 
 numAP=1
 numPA=1
@@ -59,4 +59,4 @@ if [ ! $rem == 0 ]; then
    ${FSLDIR}/bin/fslroi $1/fieldmap/B0_AP_PA $1/fieldmap/B0_AP_PA 0 -1 0 -1 0 `expr $Zslices - 1`
 fi
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+#. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
