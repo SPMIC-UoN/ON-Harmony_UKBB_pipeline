@@ -26,7 +26,7 @@
 baseDir=$1
 
 #$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz
-${FSLDIR}/bin/imcp $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
+ln -s $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
 
 
 #Correct input for dtifit
