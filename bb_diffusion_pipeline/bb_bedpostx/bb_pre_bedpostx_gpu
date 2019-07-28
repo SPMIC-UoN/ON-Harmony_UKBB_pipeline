@@ -86,7 +86,7 @@ if [ `${FSLDIR}/bin/imtest ${subjdir}/nodif` = 1 ] ; then
 fi
 
 #$FSLDIR/bin/split_parts_gpu ${subjdir}/data_ud ${subjdir}/nodif_brain_mask NULL 0 1 ${subjdir}.bedpostX
-${FSLDIR}/bin/split_parts_gpu ${subjdir}/data_ud ${subjdir}/nodif_brain_mask NULL 0 1 ${subjdir}.bedpostX
+${FSLDIR}/bin/split_parts_gpu ${subjdir}/data_ud ${subjdir}/nodif_brain_mask ${subjdir}/bvals ${subjdir}/bvecs NULL 0 1 ${subjdir}.bedpostX
 
 nvox=`${FSLDIR}/bin/fslstats $subjdir.bedpostX/nodif_brain_mask -V  | cut -d ' ' -f1 `
 
