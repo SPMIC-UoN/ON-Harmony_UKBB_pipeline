@@ -29,7 +29,7 @@ where subjectFolder contains the input NIFTI files for a given subject. Notice t
 
 Notice that the original version performs *gradient non-linearity corrections* on the data using scanner-specific files. In this version, we have turned off the grad-nonlin corrections.
 
-Finally, make sure to add the following three files with `pre-trained models (for BIANCA and FIX)`, following the instructions from https://www.fmrib.ox.ac.uk/ukbiobank/fbp.
+Finally, make sure to add the following three files with `pre-trained models (for BIANCA and FIX)`, following the instructions from https://www.fmrib.ox.ac.uk/ukbiobank/fbp. And copy the two template melodic files from https://www.dropbox.com/s/9fhunsxaetz804n/UKBB_Melodic_IC_templates.zip?dl=0 to the *templates/group* folder
 
 
 Input Requirements
