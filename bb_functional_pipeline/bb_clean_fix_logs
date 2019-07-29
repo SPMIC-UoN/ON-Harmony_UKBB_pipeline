@@ -33,6 +33,6 @@ for fixFile in ".fix.log" ".fix" ".fix_2b_predict.log" ; do
     fi
 done
 
-rm $restingDir/.fix*
+rm -f $restingDir/.fix*
 
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
