@@ -35,6 +35,6 @@ for D in 25 100 ; do
   fi
 done
 
-matlab -nojvm -nodisplay -nosplash -r "addpath('$BB_BIN_DIR/bb_functional_pipeline/');bb_netmats('$1','$wDir'); exit"
+matlab -nojvm -nodisplay -nosplash -r "addpath('$BB_BIN_DIR/bb_functional_pipeline/');addpath('$BB_BIN_DIR/bb_functional_pipeline/bb_fslnets');bb_netmats('$1','$wDir'); exit"
 
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
