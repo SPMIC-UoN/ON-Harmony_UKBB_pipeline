@@ -37,7 +37,7 @@ Input Requirements
 
 The pipeline assumes NIFTI inputs with a specific filename convention. Therefore, it is recommended to perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is:
 
-*dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o ../  $DICOMFolder*
+*dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o $OutputNIFTIFolder $InputDICOMFolder*
 
 The `minimum input` required to run the pipeline is a T1w image. The pipelines for each modality have their own expectations.
 
