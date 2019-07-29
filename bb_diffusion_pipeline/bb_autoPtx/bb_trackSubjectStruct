@@ -118,11 +118,11 @@ fi
 
 # process structure
 seedOpt=" -x $tracts/seed --waypoints=$tracts/target --dir=$tracts/tracts "
-$FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -o density --nsamples=${nSeed} --opd --avoid=$tracts/exclude -l --forcedir --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp --sampvox --rseed=`echo $RANDOM`
+$FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -o density --nsamples=${nSeed} --opd --avoid=$tracts/exclude -l --forcedir --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp --sampvox=1 --rseed=`echo $RANDOM`
 
 if [ "$symtrack" -eq "1" ]; then
   seedOpt=" -x $tracts/target --waypoints=$tracts/seed  --dir=$tracts/tractsInv "
-  $FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -o density --nsamples=${nSeed} --opd --avoid=$tracts/exclude -l --forcedir --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp --sampvox --rseed=`echo $RANDOM`
+  $FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -o density --nsamples=${nSeed} --opd --avoid=$tracts/exclude -l --forcedir --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp --sampvox=1 --rseed=`echo $RANDOM`
 fi
 
 # merge runs for forward and inverted tractography runs
