@@ -36,7 +36,6 @@ export FSLDIR=/usr/local/fsl                #TO BE MODIFIED BY USER
 export FSLCONFDIR=${FSLDIR}/config
 export FSLOUTPUTTYPE="NIFTI_GZ"
 export FSLGECUDAQ="cuda.q"                  #TO BE MODIFIED BY USER
-export FSL_FIXDIR=/usr/local/fix            #TO BE MODIFIED BY USER
 
 #SETUP FREESURFER 
 export FREESURFER_HOME=/usr/local/freesurfer #TO BE MODIFIED BY USER
@@ -57,15 +56,16 @@ export LC_ALL=C
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH              #TO BE MODIFIED BY USER
 
 #ENV VARIABLES FOR BIOBANK
-export BBDIR=/home/mszss8/UK_biobank_pipeline_v_1                          #TO BE MODIFIED BY USER
-export BB_BIN_DIR=$BBDIR
+export BBDIR=/home/mszss8/UK_biobank_pipeline_v_1                          #TO BE MODIFIED BY USER, where subject folders will be
+export BB_BIN_DIR=/home/mszss8/UK_biobank_pipeline_v_1                     #TO BE MODIFIED BY USER, where the Pipeline Scripts will be
 export FSLGPUDIR=$BB_BIN_DIR/bb_diffusion_pipeline/bedpostx
 export MNI="$FSLDIR/data/standard/MNI152_T1_1mm.nii.gz"
 export MNI_mask="$FSLDIR/data/standard/MNI152_T1_1mm_brain_mask.nii.gz"
 export MNI_brain="$FSLDIR/data/standard/MNI152_T1_1mm_brain.nii.gz"
 export MNI_dir="$FSLDIR/data/standard"
-export templ="$BBDIR/templates"
+export templ="${BB_BIN_DIR}/templates"
 export PYTHONPATH=$BB_BIN_DIR/bb_python/bb_python:$PYTHONPATH
+export FSL_FIXDIR=$BB_BIN_DIR/bb_functional_pipeline/bb_fix_dir            #TO BE MODIFIED BY USER
 
 
 #INCLUDE 3 MAIN BIOBANK DIRECTORIES IN PATH
