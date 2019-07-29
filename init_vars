@@ -65,7 +65,8 @@ export MNI_brain="$FSLDIR/data/standard/MNI152_T1_1mm_brain.nii.gz"
 export MNI_dir="$FSLDIR/data/standard"
 export templ="${BB_BIN_DIR}/templates"
 export PYTHONPATH=$BB_BIN_DIR/bb_python/bb_python:$PYTHONPATH
-export FSL_FIXDIR=$BB_BIN_DIR/bb_functional_pipeline/bb_fix_dir            #TO BE MODIFIED BY USER
+export FSL_FIXDIR=/usr/local/fix                                            #TO BE MODIFIED BY USER. Better to have a freshly installed FIX and not use the one     
+                                                                            #available in the released UKBiobank pipeline, as this ones seems to crash with post-2016 Matlab versions
 
 
 #INCLUDE 3 MAIN BIOBANK DIRECTORIES IN PATH
