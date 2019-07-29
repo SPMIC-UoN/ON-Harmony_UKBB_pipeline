@@ -22,9 +22,6 @@
 %
 function bb_netmats(subj, general_subj_dir)
 
-    addpath /home/fs0/steve/matlab/L1precision            
-    addpath /home/fs0/steve/NETWORKS/FSLNets   
-
     addpath(sprintf('%s/etc/matlab',getenv('FSLDIR')))
 
     subj_dir=strcat(general_subj_dir,'/',subj)
