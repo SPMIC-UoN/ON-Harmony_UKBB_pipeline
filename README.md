@@ -39,8 +39,7 @@ The pipeline assumes NIFTI inputs with a specific filename convention. Therefore
 
 *dcm2niix -b y -z y -f %p_coil%a_echo%e_%2s -o $OutputNIFTIFolder $InputDICOMFolder*
 
-The `minimum input` required to run the pipeline is a T1w image. The pipelines for each modality have their own expectations.
-
+The `minimum input` required to run the pipeline is a T1w image. The pipelines have their specific expectations for each modality, as explained below. In general, however, all input filenames should follow the above convention, i.e. filenames should finish with echoX_Y, where X and Y are only numbers. For some GE conversions, this convention does not hold, so filenames should be edited manually.
 
 *  **T1w Input**: Ideally a T1w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. The nifti input filename should start with "T1" (or "t1"). Also, the corresponding .json file should have a value "NORM" amongst the values for entry "ImageType".
 *  **T2w Input**: Ideally a T2w with prescan corrections for non-uniform receiver coil profiles is expected. I.e. Siemens' Prescan Normalize, GE's PURE or Philips' CLEAR. The nifti input filename should start with "T2_FLAIR" (or "t2_flair"). Also, the corresponding .json file should have a value "NORM" amongst the values for entry "ImageType".
