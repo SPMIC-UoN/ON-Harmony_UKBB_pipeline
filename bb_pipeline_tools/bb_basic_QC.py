@@ -135,7 +135,7 @@ def bb_basic_QC(subject, fileConfig):
                         #keysToPop.append(fileN)
                         #make_unusable(fileName, idealConfig[fileName]['dep_dirs'])
                         f = open('info_basic_QC.txt', 'a')
-                        f.write('Problem in file ' + fileName+'\n')
+                        f.write('Warning: Different dimensions than expected with UK Biobank scanning protocols in file ' + fileName+'\n')                        
                         f.close()
 
     for keyToPop in keysToPop:
