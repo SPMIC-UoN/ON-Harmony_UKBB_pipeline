@@ -132,7 +132,7 @@ def bb_basic_QC(subject, fileConfig):
                     img = nib.load(fileName)
                     dims = img.header['dim'][1:5]
                     if not np.all(dims == idealConfig[fileN]['dims']):
-                        keysToPop.append(fileN)
+                        #keysToPop.append(fileN)
                         #make_unusable(fileName, idealConfig[fileName]['dep_dirs'])
                         f = open('info_basic_QC.txt', 'a')
                         f.write('Problem in file ' + fileName+'\n')
