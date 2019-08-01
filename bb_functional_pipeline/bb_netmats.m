@@ -25,6 +25,9 @@ function bb_netmats(subj, general_subj_dir)
     addpath(sprintf('%s/etc/matlab',getenv('FSLDIR')))
 
     subj_dir=strcat(general_subj_dir,'/',subj)
+    [~,Ntimepoints]=unix(['${FSLDIR}/bin/fslval ' subj_dir '/fMRI/rfMRI.nii.gz dim4'])
+    [~,tr]=unix(['${FSLDIR}/bin/fslval ' subj_dir '/fMRI/rfMRI.nii.gz pixdim4'])
+
 
     for dimensionality ={'25','100'}
 
@@ -32,7 +35,7 @@ function bb_netmats(subj, general_subj_dir)
 
         group_maps=strcat(sprintf('%s/etc/matlab',getenv('FSLDIR')),sprintf('/groupICA_d%s.ica/melodic_IC',D))
         ts_dir=strcat(subj_dir, '/fMRI/',sprintf('rfMRI_%s.dr',D))  
-        ts=nets_load(ts_dir,0.735,0,1,490); 
+        ts=nets_load(ts_dir,tr,0,1,Ntimepoints); 
 
         if strcmp(D,'25')
           ts.DD=[setdiff([1:25],[4 23 24 25])];
