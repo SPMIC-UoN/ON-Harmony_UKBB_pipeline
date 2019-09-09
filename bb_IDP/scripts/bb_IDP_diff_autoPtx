@@ -46,8 +46,8 @@ done
 result="" 
 
 allgood=1
-#for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
-for i in FA MD MO L1 L2 L3 ; do
+for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+#for i in FA MD MO L1 L2 L3 ; do
   if [ ! -f $basedMRI/autoptx_preproc/APTX_${i}.txt ] || [ `cat $basedMRI/autoptx_preproc/APTX_${i}.txt | wc -w` != 27 ] ; then
     allgood=0
   fi
@@ -78,8 +78,8 @@ if [ $allgood = 0 ] ; then
     tractnorm=`fslstats -t $basedMRI/autoptx_preproc/tmp_all -m`
 
     if [ -f $basedMRI/autoptx_preproc/tmp_all.nii.gz ] ; then
-        #for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
-        for i in FA MD MO L1 L2 L3 ; do
+        for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+        #for i in FA MD MO L1 L2 L3 ; do
           /bin/rm -f $basedMRI/autoptx_preproc/APTX_${i}.txt
           if [ -f $basedMRI/TBSS/stats/all_${i}.nii.gz ] ; then
               fslmaths $basedMRI/autoptx_preproc/tmp_all -mul $basedMRI/TBSS/stats/all_${i} $basedMRI/autoptx_preproc/tmp
@@ -99,8 +99,8 @@ if [ $allgood = 0 ] ; then
   fi
 fi
 
-#for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
-for i in FA MD MO L1 L2 L3 ; do
+for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+#for i in FA MD MO L1 L2 L3 ; do
   if [ -f $basedMRI/autoptx_preproc/APTX_${i}.txt ] && [ `cat $basedMRI/autoptx_preproc/APTX_${i}.txt | wc -w` = 27 ] ; then
     miniResult=`cat $basedMRI/autoptx_preproc/APTX_${i}.txt`
   else
