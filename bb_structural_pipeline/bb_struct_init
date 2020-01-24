@@ -21,7 +21,15 @@
 # limitations under the License.
 #
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
+
+
+if [ "$GDC_Status" = 0 ] ; then
+  echo Running with GDC off for bb_struct_init
+else
+  echo Running with GDC on for bb_struct_init
+fi
+
 
 cd $1/T1
 
@@ -34,9 +42,14 @@ if [ `${FSLDIR}/bin/imtest T1_orig` = 0 ] ; then
   ${FSLDIR}/bin/immv T1 T1_orig
 fi
 
-#Calculate and apply the Gradient Distortion Unwarp
-#$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T1_GDC/ --in=T1_orig.nii.gz --out=T1_orig_ud.nii.gz --owarp=T1_orig_ud_warp.nii.gz
-${FSLDIR}/bin/imcp T1_orig T1_orig_ud
+#Calculate and apply the Gradiefnt Distortion Unwarp
+
+if [ $GDC_Status = 1 ] ; then
+  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T1_GDC/ --in=T1_orig.nii.gz --out=T1_orig_ud.nii.gz --owarp=T1_orig_ud_warp.nii.gz
+else
+  ${FSLDIR}/bin/imcp T1_orig T1_orig_ud
+fi
+
 
 #Calculate where does the brain start in the z dimension and then extract the roi
 head_top=`${FSLDIR}/bin/robustfov -i T1_orig_ud | grep -v Final | head -n 1 | awk '{print $5}'`
@@ -51,7 +64,7 @@ ${FSLDIR}/bin/standard_space_roi T1_tmp_brain T1_tmp2 -maskNONE -ssref $FSLDIR/d
 ${FSLDIR}/bin/immv T1_tmp2 T1
 
 #Generate the actual affine from the orig_ud volume to the cut version we have now and combine it to have an affine matrix from orig_ud to MNI
-${FSLDIR}/bin/flirt -in T1 -ref T1_orig_ud -omat T1_to_T1_orig_ud.mat -schedule $FSLDIR/etc/flirtsch/xyztrans.sch 
+${FSLDIR}/bin/flirt -in T1 -ref T1_orig_ud -omat T1_to_T1_orig_ud.mat -schedule $FSLDIR/etc/flirtsch/xyztrans.sch
 ${FSLDIR}/bin/convert_xfm -omat T1_orig_ud_to_T1.mat -inverse T1_to_T1_orig_ud.mat
 ${FSLDIR}/bin/convert_xfm -omat T1_to_MNI_linear.mat -concat T1_tmp2_tmp_to_std.mat T1_to_T1_orig_ud.mat
 
@@ -62,8 +75,12 @@ ${FSLDIR}/bin/fnirt --in=T1 --ref=$FSLDIR/data/standard/MNI152_T1_1mm --aff=T1_t
   --jout=T1_to_MNI_warp_jac --iout=T1_tmp4.nii.gz --interp=spline
 
 #Combine both transforms (Gradient Distortion Unwarp and T1 to MNI) into one and then apply it.
-#${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T1_orig_ud_warp --midmat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
-${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
+if [ $GDC_Status = 1 ] ; then
+  ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T1_orig_ud_warp --midmat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
+else
+  ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
+fi
+
 ${FSLDIR}/bin/applywarp --rel -i T1_orig -r $FSLDIR/data/standard/MNI152_T1_1mm -w T1_orig_to_MNI_warp -o T1_brain_to_MNI --interp=spline
 
 #Create brain mask
@@ -80,18 +97,19 @@ ${FSLDIR}/bin/flirt -in $templ/MNI152_T1_1mm_BigFoV_facemask -ref T1_orig -out g
 #${FSLDIR}/bin/fslmaths grot -mul -1 -add 1 -mul T1_orig T1_orig_defaced
 ${FSLDIR}/bin/fslmaths grot -binv -mul T1_orig T1_orig_defaced
 
-cp T1.nii.gz T1_not_defaced_tmp.nii.gz  
+cp T1.nii.gz T1_not_defaced_tmp.nii.gz
 ${FSLDIR}/bin/convert_xfm -omat grot.mat -concat $templ/MNI_to_MNI_BigFoV_facemask.mat T1_to_MNI_linear.mat
 ${FSLDIR}/bin/convert_xfm -omat grot.mat -inverse grot.mat
 ${FSLDIR}/bin/flirt -in $templ/MNI152_T1_1mm_BigFoV_facemask -ref T1 -out grot -applyxfm -init grot.mat
 ${FSLDIR}/bin/fslmaths grot -binv -mul T1 T1
 
 #Generation of QC value: Number of voxels in which the defacing mask goes into the brain mask
-${FSLDIR}/bin/fslmaths T1_brain_mask -thr 0.5 -bin grot_brain_mask 
+${FSLDIR}/bin/fslmaths T1_brain_mask -thr 0.5 -bin grot_brain_mask
 ${FSLDIR}/bin/fslmaths grot -thr 0.5 -bin -add grot_brain_mask -thr 2 grot_QC
 ${FSLDIR}/bin/fslstats grot_QC.nii.gz -V | awk '{print $ 1}' > T1_QC_face_mask_inside_brain_mask.txt
 
-rm grot*
+rm grot.mat grot.nii.gz grot_QC.nii.gz grot_brain_mask.nii.gz
+if [ -d grot_dir ]; then rm -Rf grot_dir; fi
 
 
 #Clean and reorganize
@@ -116,8 +134,11 @@ else
     fi
 
     #Gradient Distortion Unwarp
-    #$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz
-    ${FSLDIR}/bin/imcp T2_FLAIR_orig T2_FLAIR_orig_ud
+    if [ $GDC_Status = 1 ] ; then
+      $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz
+    else
+      ${FSLDIR}/bin/imcp T2_FLAIR_orig T2_FLAIR_orig_ud
+    fi
 
     #Take T2 to T1 and also the brain mask
     ${FSLDIR}/bin/flirt -in T2_FLAIR_orig_ud -ref ../T1/T1_orig_ud -out T2_FLAIR_tmp -omat T2_FLAIR_tmp.mat -dof 6
@@ -130,11 +151,16 @@ else
 
     #Generate the linear matrix from T2 to MNI (Needed for defacing)
     ${FSLDIR}/bin/convert_xfm -omat T2_FLAIR_orig_ud_to_MNI_linear.mat -concat ../T1/transforms/T1_to_MNI_linear.mat T2_FLAIR_orig_ud_to_T2_FLAIR.mat
-    cp ../T1/transforms/T1_to_MNI_linear.mat T2_FLAIR_to_MNI_linear.mat 
+    cp ../T1/transforms/T1_to_MNI_linear.mat T2_FLAIR_to_MNI_linear.mat
 
     #Generate the non-linearly warped T2 in MNI (Needed for post-freesurfer processing)
-    #${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T2_FLAIR_orig_ud_warp --midmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
-    ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
+    if [ $GDC_Status = 1 ] ; then
+      ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T2_FLAIR_orig_ud_warp --midmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
+    else
+      ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
+    fi
+
+
     ${FSLDIR}/bin/applywarp --rel  -i T2_FLAIR_orig -r $FSLDIR/data/standard/MNI152_T1_1mm -w T2_FLAIR_orig_to_MNI_warp -o T2_FLAIR_brain_to_MNI --interp=spline
     ${FSLDIR}/bin/fslmaths T2_FLAIR_brain_to_MNI -mul $templ/MNI152_T1_1mm_brain_mask T2_FLAIR_brain_to_MNI
 
@@ -145,7 +171,7 @@ else
     ${FSLDIR}/bin/flirt -in $templ/MNI152_T1_1mm_BigFoV_facemask -ref T2_FLAIR_orig -out grot -applyxfm -init grot.mat
     ${FSLDIR}/bin/fslmaths grot -binv -mul T2_FLAIR_orig T2_FLAIR_orig_defaced
 
-    cp T2_FLAIR.nii.gz T2_FLAIR_not_defaced_tmp.nii.gz  
+    cp T2_FLAIR.nii.gz T2_FLAIR_not_defaced_tmp.nii.gz
     ${FSLDIR}/bin/convert_xfm -omat grot.mat -concat $templ/MNI_to_MNI_BigFoV_facemask.mat T2_FLAIR_to_MNI_linear.mat
     ${FSLDIR}/bin/convert_xfm -omat grot.mat -inverse grot.mat
     ${FSLDIR}/bin/flirt -in $templ/MNI152_T1_1mm_BigFoV_facemask -ref T2_FLAIR -out grot -applyxfm -init grot.mat
@@ -157,7 +183,7 @@ else
     mkdir transforms
     mv *.mat transforms
     mv *warp*.* transforms
-    
+
     cd ..
 
 fi
@@ -209,7 +235,7 @@ $BB_BIN_DIR/bb_structural_pipeline/bb_QC_CNR_corners_complete ../$1
 #The rest of the script works with T2 only if there is one.
 if [ `${FSLDIR}/bin/imtest T2_FLAIR/T2_FLAIR_orig` = 0 ] ; then
   echo "WARNING: No T2 in $1"
-  . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+  . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
   exit
 fi
 
@@ -229,7 +255,6 @@ cd ../..
 $BB_BIN_DIR/bb_structural_pipeline/bb_BIANCA $1
 
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
 
 set +x
-
