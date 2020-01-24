@@ -21,15 +21,21 @@
 # limitations under the License.
 #
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
 
 baseDir=$1
 
+if [ $GDC_Status = 1 ] ; then
+  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz
+else
+  ln -s $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
+fi
 #$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz
-ln -s $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
+
 
 
 #Correct input for dtifit
 $BB_BIN_DIR/bb_diffusion_pipeline/bb_select_dwi_vols $baseDir/dMRI/dMRI/data_ud.nii.gz $baseDir/dMRI/dMRI/bvals $baseDir/dMRI/dMRI/data_ud_1_shell 1000 1 $baseDir/dMRI/dMRI/bvecs
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
