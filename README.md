@@ -9,7 +9,7 @@ Dependencies
 
 Most of the dependencies of `UK_biobank_pipeline` are listed in the [requirements.txt](requirements.txt) file.
 
-One additional dependency - [gradunwarp](bb_python/python_installation/gradunwarp_FMRIB.tar.gz) - can be installed with a provided [installation script](bb_python/python_installation/install_bb_python.sh) 
+All aditional dependencies can be installed with a provided [installation script](bb_python/python_installation/install_bb_python.sh)
 
 
 Documentation
@@ -23,17 +23,20 @@ First install the UK_Biobank Python Conda Environment by going into the `bb_pyth
 
 This will activate the UKBB Conda environment. We can then run the pipeline. Once NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
 
+GDC (gradient non linearity corrections) should be turned on for SIEMNS scanners. (The scanner coeff files should be copied into bb_data). For non Siemens scanners we have trusted the GDC perfomred by the scanner  and can turn this off.
+
 *bb_pipeline.py subjectFolder*
 
-where subjectFolder contains the input NIFTI files for a given subject. Notice that the current version of the pipeline expects that subjectFolder is within the parent UKB-pipeline directory (i.e. within $BBDIR).
+where subjectFolder contains the input NIFTI files for a given subject.
 
-Notice that the original version performs *gradient non-linearity corrections* on the data using scanner-specific files. In this version, we have turned off the grad-nonlin corrections.
-
-Finally, make sure to add the following three files with `pre-trained models (for BIANCA and FIX)`, following the instructions from https://www.fmrib.ox.ac.uk/ukbiobank/fbp. And copy the two template melodic files from https://www.dropbox.com/s/9fhunsxaetz804n/UKBB_Melodic_IC_templates.zip?dl=0 to the `templates/group` folder.
-
+Finally,  add the following "UKBiobank.RData." for FIX (BIANCA files already done) from https://www.fmrib.ox.ac.uk/ukbiobank/fbp.
 
 Input Requirements
 ------------------
+
+There are now scrpits to do this whih can be found in bb_prepipeline_scripts. Follow instructions there to automatically prepare data for pipeline.
+
+Below is a summary of what the scripts are doing.
 
 The pipeline assumes NIFTI inputs with a specific filename convention. Therefore, it is recommended to perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is:
 
