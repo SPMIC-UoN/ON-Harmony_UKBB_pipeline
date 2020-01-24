@@ -30,14 +30,29 @@
 #PYTHON VERSION                                #RECOMMENDED
 pyVersion="3.5.1"
 
-#SETUP FSL  
+
+
+#Pipeline paramters
+export GDC_Status=0                        #0 = GDC OFF, 1 = GDC ON
+export Grad_file=FMRIB_Prisma_coeff.grad
+
+#sourcing set up file for swi
+source /home/ppxan2/UK_biobank_pipeline/bb_structural_pipeline/bb_swi_dir/settings.sh
+
+if [ $GDC_Status = 0 ] ; then
+  echo GDC is off
+else
+  echo GDC is on
+fi
+
+#SETUP FSL
 export FSLDIR=/usr/local/fsl                #TO BE MODIFIED BY USER
 . $FSLDIR/etc/fslconf/fsl.sh
 export FSLCONFDIR=${FSLDIR}/config
 export FSLOUTPUTTYPE="NIFTI_GZ"
 export FSLGECUDAQ="cuda.q"                  #TO BE MODIFIED BY USER
 
-#SETUP FREESURFER 
+#SETUP FREESURFER
 export FREESURFER_HOME=/usr/local/freesurfer #TO BE MODIFIED BY USER
 source $FREESURFER_HOME/SetUpFreeSurfer.sh  > /dev/null
 
@@ -52,12 +67,12 @@ export R_LIBS=/usr/lib64/R/library:/usr/share/R/library                    #TO B
 #SET LOCALE FOR FLOATING POINT FORMATTING
 export LC_ALL=C
 
-#SET DYNAMIC LIBRARIES FOR BEDPOSTX           
+#SET DYNAMIC LIBRARIES FOR BEDPOSTX
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH              #TO BE MODIFIED BY USER
 
 #ENV VARIABLES FOR BIOBANK
-export BBDIR=/home/mszss8/UK_biobank_pipeline_v_1                          #TO BE MODIFIED BY USER, where subject folders will be
-export BB_BIN_DIR=/home/mszss8/UK_biobank_pipeline_v_1                     #TO BE MODIFIED BY USER, where the Pipeline Scripts will be
+export BBDIR=/home/ppxan2/Harmonise3T/Processing                          #TO BE MODIFIED BY USER, where subject folders will be
+export BB_BIN_DIR=/home/ppxan2/UK_biobank_pipeline                     #TO BE MODIFIED BY USER, where the Pipeline Scripts will be
 export FSLGPUDIR=$BB_BIN_DIR/bb_diffusion_pipeline/bedpostx
 export MNI="$FSLDIR/data/standard/MNI152_T1_1mm.nii.gz"
 export MNI_mask="$FSLDIR/data/standard/MNI152_T1_1mm_brain_mask.nii.gz"
@@ -65,10 +80,13 @@ export MNI_brain="$FSLDIR/data/standard/MNI152_T1_1mm_brain.nii.gz"
 export MNI_dir="$FSLDIR/data/standard"
 export templ="${BB_BIN_DIR}/templates"
 export PYTHONPATH=$BB_BIN_DIR/bb_python/bb_python:$PYTHONPATH
-export FSL_FIXDIR=/usr/local/fix                                            #TO BE MODIFIED BY USER. Better to have a freshly installed FIX and not use the one     
+export FSL_FIXDIR=/usr/local/fix                                            #TO BE MODIFIED BY USER. Better to have a freshly installed FIX and not use the one
                                                                             #available in the released UKBiobank pipeline, as this ones seems to crash with post-2016 Matlab versions
+#SETUP LOGDIR
+export logDir=$BBDIR
 
-
+#SETUP SUBJECT
+export subject=$BBDIR
 #INCLUDE 3 MAIN BIOBANK DIRECTORIES IN PATH
 export PATH=$BB_BIN_DIR/bb_pipeline_tools/:$BB_BIN_DIR/bb_general_tools/:$PATH
 
