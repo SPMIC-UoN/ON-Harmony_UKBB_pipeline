@@ -2,7 +2,7 @@
 #
 # Script name: bb_pipeline_diff.py
 #
-# Description: Script with the dMRI pipeline. 
+# Description: Script with the dMRI pipeline.
 #			   This script will call the rest of dMRI functions.
 #
 # Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
@@ -40,8 +40,7 @@ def bb_pipeline_diff(subject, jobHold, fileConfiguration):
     jobPREBEDPOSTX =  LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5   -N "bb_pre_bedpostx_gpu_'    + subject + '" -j ' + jobDTIFIT      + '  -l ' + logDir + ' $BB_BIN_DIR/bb_diffusion_pipeline/bb_bedpostx/bb_pre_bedpostx_gpu ' + baseDir + '/dMRI/dMRI')
     jobBEDPOSTX =     LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 190 -N "bb_bedpostx_gpu_'        + subject + '" -j ' + jobPREBEDPOSTX + '  -q $FSLGECUDAQ -l ' + logDir + ' $BB_BIN_DIR/bb_diffusion_pipeline/bb_bedpostx/bb_bedpostx_gpu ' + baseDir + '/dMRI/dMRI')
     jobPOSTBEDPOSTX = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 15  -N "bb_post_bedpostx_gpu_'   + subject + '" -j ' + jobBEDPOSTX    + '  -l ' + logDir + ' $BB_BIN_DIR/bb_diffusion_pipeline/bb_bedpostx/bb_post_bedpostx_gpu ' + baseDir + '/dMRI/dMRI')
-    jobAUTOPTX =      LT.runCommand(logger, '$BB_BIN_DIR/bb_diffusion_pipeline/bb_autoPtx/bb_autoPtx ' + subject + ' ' + jobPOSTBEDPOSTX+','+jobTBSS)
-    
-    return jobAUTOPTX
+    #jobAUTOPTX =      LT.runCommand(logger, '$BB_BIN_DIR/bb_diffusion_pipeline/bb_autoPtx/bb_autoPtx ' + subject + ' ' + jobPOSTBEDPOSTX+','+jobTBSS)
+    jobXTRACT =      LT.runCommand(logger, '$BB_BIN_DIR/bb_diffusion_pipeline/bb_xtract/bb_xtract ' + subject + ' ' + jobPOSTBEDPOSTX+','+jobTBSS)
 
-
+    return jobXTRACT
