@@ -1,0 +1,91 @@
+# FSL - XTRACT
+#
+# WM structures file
+#
+# Format:  <name> <# samples per seed voxel/1000>
+#
+# naming convention must correspond to subfolders of 'protocols'
+#
+
+# Arcuate Fascile
+af_l 10
+af_r 10
+
+# Acoustic Radiation
+ar_l 5
+ar_r 5
+
+# Anterior Thalamic Radiation
+atr_l 1
+atr_r 1
+
+# Cingulum Bundle Dorsal
+cbd_l 10
+cbd_r 10
+
+# Cingulum Bundle Parahippocampal
+cbp_l 10
+cbp_r 10
+
+# Cingulum Bundle Temporal
+cbt_l 10
+cbt_r 10
+
+# Corticospinal Tract
+cst_l 3
+cst_r 3
+
+# Frontal Aslant
+fa_l 3
+fa_r 3
+
+# Forceps Major and Minor
+fma 0.5
+fmi 0.5
+
+# Fornix
+fx_l 10
+fx_r 10
+
+# Inferior Longitudinal Fasciculus
+ilf_l 3
+ilf_r 3
+
+# Inferior Fronto-occipital Fasciculus
+ifo_l 3
+ifo_r 3
+
+# Middle Cerebellar Peduncle
+mcp 3
+
+# Medio-Dorsal Longitudinal Fasciculus
+mdlf_l 5
+mdlf_r 5
+
+# Optic Radiation
+or_l 10
+or_r 10
+
+# Superior Thalamic Radiation
+str_l 1
+str_r 1
+
+# Superior Longitudinal Fasciculus 1,2,3
+slf1_l 10
+slf1_r 10
+slf2_l 10
+slf2_r 10
+slf3_l 10
+slf3_r 10
+
+# Anterior Commissure
+ac 5
+
+# Uncinate Fasciculus
+uf_l 1
+uf_r 1
+
+# Vertical Occipital Fasciculus
+vof_l 10
+vof_r 10
+
