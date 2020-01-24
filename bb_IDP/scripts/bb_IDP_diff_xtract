@@ -1,0 +1,117 @@
+#!/bin/sh
+#
+# Script name: bb_IDP_diff_autoPtx
+#
+# Description: Script to generate the IDPs related to tracts with autoPtx
+#
+# Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
+#
+# Copyright 2017 University of Oxford
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+set -x
+
+origDir=`pwd`
+scriptName=`basename "$0"`
+direc=$1
+
+cd $direc
+
+basedMRI="dMRI"
+#if [ -d $basedMRI/unusable ] ; then
+#    basedMRI="$basedMRI/unusable"
+#elif [ -d $basedMRI/incompatible ] ; then
+#    basedMRI="$basedMRI/incompatible"
+#fi
+
+#Setting the string of NaN in case there is a problem.
+numVars="42"
+nanResult="";
+for i in $(seq 1 $numVars) ; do
+    nanResult="NaN $nanResult" ;
+done
+
+result=""
+
+allgood=1
+for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+#for i in FA MD MO L1 L2 L3 ; do
+  if [ ! -f $basedMRI/xtract_preproc/APTX_${i}.txt ] || [ `cat $basedMRI/xtract_preproc/APTX_${i}.txt | wc -w` != 42 ] ; then
+    allgood=0
+  fi
+done
+
+if [ $allgood = 0 ] ; then
+  if [ -f $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm.nii.gz ] ; then
+
+    ntracts=`echo $basedMRI/xtract_preproc/tracts/*/tracts/tractsNorm.nii.gz | wc -w`
+    if [ $ntracts != 42 ] ; then
+      >&2 echo only found $ntracts tracts
+    fi
+
+    # hack to ameliorate partial misalignment of mcp
+    fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -thr 1000 -bin -ero -ero -mul $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm -odt float
+
+    for p in ac af_l af_r ar_l ar_r atr_l atr_r cbd_l cbd_r cbp_l cbp_r cbt_l cbt_r cst_l cst_r fa_l fa_r fma fmi fx_l fx_r ifo_l ifo_r ilf_l ilf_r mcp mdlf_l mdlf_r or_l or_r slf1_l slf1_r slf2_l slf2_r slf3_l slf3_r str_l str_r uf_l uf_r vof_l vof_r ; do
+      if [ -f $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm.nii.gz ] ; then
+        t=`fslstats $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm -P 99`
+        fslmaths $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm -min $t -mul 1e6 -div $t -thr 1e5 $basedMRI/xtract_preproc/tmp_$p
+      fi
+    done
+
+    cad=""
+
+    fslmerge -t $basedMRI/xtract_preproc/tmp_all \
+         $basedMRI/xtract_preproc/tmp_{af_l,af_r,ar_l,ar_r,atr_l,atr_r,cbd_l,cbd_r,cbp_l,cbp_r,cbt_l,cbt_r,cst_l,cst_r,fa_l,fa_r,fma,fmi,fx_l,fx_r,ifo_l,ifo_r,ilf_l,ilf_r,mcp,mdlf_l,mdlf_r,or_l,or_r,slf1_l,slf1_r,slf2_l,slf2_r,slf3_l,slf3_r,str_l,str_r,uf_l,uf_r,vof_l,vof_r}.nii.gz
+    tractnorm=`fslstats -t $basedMRI/xtract_preproc/tmp_all -m`
+
+    if [ -f $basedMRI/xtract_preproc/tmp_all.nii.gz ] ; then
+      for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+      #for i in FA MD MO L1 L2 L3 ; do
+          /bin/rm -f $basedMRI/xtract_preproc/APTX_${i}.txt
+          if [ -f $basedMRI/TBSS/stats/all_${i}.nii.gz ] ; then
+              fslmaths $basedMRI/xtract_preproc/tmp_all -mul $basedMRI/TBSS/stats/all_${i} $basedMRI/xtract_preproc/tmp
+              tractmeas=`fslstats -t $basedMRI/xtract_preproc/tmp -m | sed 's/-/_/g'`
+              jmax=`fslnvols $basedMRI/xtract_preproc/tmp_all`
+              for (( j=1; j <= $jmax; ++j )) ; do
+                tm=`echo $tractmeas | cut -d " " -f$j`
+                tn=`echo $tractnorm | cut -d " " -f$j`
+                echo "10 k $tm $tn / p" | dc - >> $basedMRI/xtract_preproc/APTX_${i}.txt
+              done
+          fi
+        done
+        rm $basedMRI/xtract_preproc/tmp_*.nii.gz
+    fi
+  else
+    >&2 echo "mcp tract missing"
+  fi
+fi
+
+for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
+#for i in FA MD MO L1 L2 L3 ; do
+  if [ -f $basedMRI/xtract_preproc/APTX_${i}.txt ] && [ `cat $basedMRI/xtract_preproc/APTX_${i}.txt | wc -w` = 42 ] ; then
+    miniResult=`cat $basedMRI/xtract_preproc/APTX_${i}.txt`
+  else
+    miniResult="$nanResult"
+  fi
+  result="$result $miniResult"
+done
+
+mkdir -p IDP_files
+
+echo $result > IDP_files/$scriptName.txt
+echo $result
+
+cd $origDir
