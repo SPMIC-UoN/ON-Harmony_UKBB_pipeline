@@ -1,7 +1,7 @@
-af_l 10 100
-af_r 10 100
-ar_l 5 110
-ar_r 5 110
+af_l 10 950
+af_r 10 950
+ar_l 5 1000
+ar_r 5 1000
 atr_l 1 120
 atr_r 1 120
 cbd_l 10 130
@@ -29,15 +29,14 @@ or_l 10 230
 or_r 10 240
 str_l 1 240
 str_r 1 250
-slf1_l 10 250 
-slf1_r 10 260 
-slf2_l 10 260 
-slf2_r 10 270 
-slf3_l 10 270 
-slf3_r 10 280 
-ac 5 280 
+slf1_l 10 250
+slf1_r 10 260
+slf2_l 10 260
+slf2_r 10 270
+slf3_l 10 270
+slf3_r 10 280
+ac 5 280
 uf_l 1 290
-uf_r 1 290 
+uf_r 1 290
 vof_l 10 300
 vof_r 10 300
-
