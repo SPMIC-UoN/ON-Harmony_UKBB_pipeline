@@ -60,7 +60,7 @@
 #   accompanying paper DOI: 10.1016/j.neuroimage.2013.03.015.
 #
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
 
 sub=$1
 struct=$2
@@ -108,21 +108,27 @@ fi
 
 jobMATH4="1"
 
+# Deal with targets (in cases where there may be more than one)
+targets=`imglob $masks/target*`
+targetfile=$tracts/targets.txt
+echo $targets > $targetfile
+
+
 #Copy the seed, target and exclude files
-${FSLDIR}/bin/imcp $masks/seed $tracts/seed 
-${FSLDIR}/bin/imcp $masks/target $tracts/target 
+${FSLDIR}/bin/imcp $masks/seed $tracts/seed
+${FSLDIR}/bin/imcp $masks/target* $tracts
 ${FSLDIR}/bin/imcp $masks/exclude $tracts/exclude
 if [ "$useStop" -eq "1" ]; then
   ${FSLDIR}/bin/imcp $masks/stop $tracts/stop
 fi
 
 # process structure
-seedOpt=" -x $tracts/seed --waypoints=$tracts/target --dir=$tracts/tracts "
-$FSLDIR/bin/probtrackx2_gpu -s dMRI_GE/dMRI.bedpostX/merged -m ./dMRI/nodif_brain_mask $seedOpt $stopOpt -V 1 --loopcheck --forcedir --opd --ompl --seedref=/usr/local/fsl/data/standard/MNI152_T1_1mm --sampvox=1 --randfib=1 --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp 
+seedOpt=" -x $tracts/seed --waypoints=$targetfile --dir=$tracts/tracts "
+$FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -V 1 -o density --loopcheck --forcedir --opd --avoid=$tracts/exclude --ompl --seedref=/usr/local/fsl/data/standard/MNI152_T1_1mm --sampvox=1 --randfib=1 --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp --rseed=`echo $RANDOM`
 
 if [ "$symtrack" -eq "1" ]; then
   seedOpt=" -x $tracts/target --waypoints=$tracts/seed  --dir=$tracts/tractsInv "
-$FSLDIR/bin/probtrackx2_gpu -s dMRI_GE/dMRI.bedpostX/merged -m ./dMRI/nodif_brain_mask $seedOpt $stopOpt -V 1 --loopcheck --forcedir --opd --ompl --seedref=/usr/local/fsl/data/standard/MNI152_T1_1mm --sampvox=1 --randfib=1 --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp 
+$FSLDIR/bin/probtrackx2_gpu -s $bpdata/merged -m ../dMRI/nodif_brain_mask $seedOpt $stopOpt -V 1 -o density --loopcheck --forcedir --opd --avoid=$tracts/exclude --ompl --seedref=/usr/local/fsl/data/standard/MNI152_T1_1mm --sampvox=1 --randfib=1 --xfm=$MNI_to_FA_warp --invxfm=$FA_to_MNI_warp  --rseed=`echo $RANDOM`
 fi
 
 # merge runs for forward and inverted tractography runs
@@ -133,7 +139,7 @@ if [ "$symtrack" = "1" ]; then
   rm -f $tracts/tracts/waytotal
   way2=`cat $tracts/tractsInv/waytotal | sed 's/e/\\*10^/' | tr -d '+' `
   way=$(echo "scale=5; $way1 + $way2 "|bc)
-  echo $way > $tracts/tracts/waytotal 
+  echo $way > $tracts/tracts/waytotal
 fi
 
 # perform normalisation for waytotal
@@ -142,5 +148,4 @@ $FSLDIR/bin/fslmaths $tracts/tracts/density -div $waytotal -range $tracts/tracts
 
 cd ../../
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
-
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
