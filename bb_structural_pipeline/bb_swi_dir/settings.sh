@@ -17,7 +17,7 @@ fi
 # =======================
 # Point this variable at your MATLAB install folder
 if [ -z "${FSL_SWI_MATLAB_ROOT}" ]; then
-       FSL_SWI_MATLAB_ROOT=/opt/fmrib/MATLAB/R2016a
+       FSL_SWI_MATLAB_ROOT=/usr/local/matlab/R2018a
        # On OS X this will most likely be something like /Applications/MATLAB_R20XX.app
 fi
 # On OS X this will most likely be something like /Applications/MATLAB_R20XX.app
@@ -33,7 +33,7 @@ FSL_SWI_MCC=${FSL_SWI_MATLAB_ROOT}/bin/mcc
 # Point this variable at an installed MATLAB compiler runtime. This
 # MUST be the same as the version given in the file MCR.version
 # (which is populated when the software is compiled).
-FSL_SWI_MCRROOT=/opt/fmrib/MATLAB/MATLAB_Compiler_Runtime
+FSL_SWI_MCRROOT=/usr/local/matlab/R2018a/mcr
 
 if [ -f ${FSL_SWIDIR}/MCR.version ]; then
 	FSL_SWI_MCRV=`cat ${FSL_SWIDIR}/MCR.version`
@@ -63,7 +63,8 @@ FSL_SWI_MLFILE="\<"
 # Point this variable at your Octave command (or leave it blank to
 # disable Octave mode
 # Linux:
-FSL_SWI_OCTAVE=/usr/bin/octave
+#FSL_SWI_OCTAVE=/usr/bin/octave
+FSL_SWI_OCTAVE=
 # Mac OS X installed via MacPorts
 #FSL_SWI_OCTAVE=/opt/local/bin/octave
 # Disable Octave mode
@@ -85,7 +86,7 @@ FSL_SWI_OCFILE=""
 #   0 - Try running the compiled version of the function
 #   1 - Use the MATLAB script version
 #   2 - Use Octave script version
-FSL_SWI_MATLAB_MODE=0
+FSL_SWI_MATLAB_MODE=1
 
 FSL_SWI_CIFTIRW="$BB_BIN_DIR/bb_ext_tools/workbench/CIFTIMatlabReaderWriter";
 # Set this to the location of the HCP Workbench command for your platform
