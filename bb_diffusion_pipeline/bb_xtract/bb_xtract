@@ -43,8 +43,11 @@ else
 	FA_to_MNI_warp=$4
 fi
 
+direc=$PWD/$1/dMRI
 
-/home/ppxan2/xtract-master/xtract -bpx $1/dMRI/dMRI.bedpostX -out $1/dMRI/xtract_preproc -species HUMAN -stdwarp $MNI_to_FA_warp $FA_to_MNI_warp -gpu
+cd $direc
+
+/home/ppxan2/xtract-master/xtract -bpx dMRI.bedpostX -out xtract_preproc -species HUMAN -stdwarp $MNI_to_FA_warp $FA_to_MNI_warp -gpu
 
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
 
