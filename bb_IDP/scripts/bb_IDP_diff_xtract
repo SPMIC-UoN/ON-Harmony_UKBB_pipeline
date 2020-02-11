@@ -54,20 +54,20 @@ for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
 done
 
 if [ $allgood = 0 ] ; then
-  if [ -f $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm.nii.gz ] ; then
+  if [ -f $basedMRI/xtract_preproc/tracts/mcp/densityNorm.nii.gz ] ; then
 
-    ntracts=`echo $basedMRI/xtract_preproc/tracts/*/tracts/tractsNorm.nii.gz | wc -w`
+    ntracts=`echo $basedMRI/xtract_preproc/tracts/*/densityNorm.nii.gz | wc -w`
     if [ $ntracts != 42 ] ; then
       >&2 echo only found $ntracts tracts
     fi
 
     # hack to ameliorate partial misalignment of mcp
-    fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -thr 1000 -bin -ero -ero -mul $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm $basedMRI/xtract_preproc/tracts/mcp/tracts/tractsNorm -odt float
+    fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -thr 1000 -bin -ero -ero -mul $basedMRI/xtract_preproc/tracts/mcp/densityNorm $basedMRI/xtract_preproc/tracts/mcp/densityNorm -odt float
 
     for p in ac af_l af_r ar_l ar_r atr_l atr_r cbd_l cbd_r cbp_l cbp_r cbt_l cbt_r cst_l cst_r fa_l fa_r fma fmi fx_l fx_r ifo_l ifo_r ilf_l ilf_r mcp mdlf_l mdlf_r or_l or_r slf1_l slf1_r slf2_l slf2_r slf3_l slf3_r str_l str_r uf_l uf_r vof_l vof_r ; do
-      if [ -f $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm.nii.gz ] ; then
-        t=`fslstats $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm -P 99`
-        fslmaths $basedMRI/xtract_preproc/tracts/$p/tracts/tractsNorm -min $t -mul 1e6 -div $t -thr 1e5 $basedMRI/xtract_preproc/tmp_$p
+      if [ -f $basedMRI/xtract_preproc/tracts/$p/densityNorm.nii.gz ] ; then
+        t=`fslstats $basedMRI/xtract_preproc/tracts/$p/densityNorm -P 99`
+        fslmaths $basedMRI/xtract_preproc/tracts/$p/densityNorm -min $t -mul 1e6 -div $t -thr 1e5 $basedMRI/xtract_preproc/tmp_$p
       fi
     done
 
