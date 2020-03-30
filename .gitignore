@@ -2,3 +2,4 @@ bb_python
 __pycache__
 nohup.out
 .idea
+bb_diffusion_pipeline/bb_cuDIMOT/bin
