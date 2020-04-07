@@ -9,7 +9,7 @@ Dependencies
 
 Most of the dependencies of `UK_biobank_pipeline` are listed in the [requirements.txt](requirements.txt) file.
 
-All aditional dependencies can be installed with a provided [installation script](bb_python/python_installation/install_bb_python.sh)
+All additional dependencies can be installed with a provided [installation script](bb_python/python_installation/install_bb_python.sh)
 
 
 Documentation
@@ -21,9 +21,9 @@ First install the UK_Biobank Python Conda Environment by going into the `bb_pyth
 
 *. init_vars*
 
-This will activate the UKBB Conda environment. We can then run the pipeline. Once NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by init_vars). So:
+This will activate the UKBB Conda environment. We can then run the pipeline. Once NIFTIs are available, the pipeline can be called using `bb_pipeline.py` (in the bb_pipeline_tools folder, but should be added to PATH by sourcing init_vars). So:
 
-GDC (gradient non linearity corrections) should be turned on for SIEMNS scanners. (The scanner coeff files should be copied into bb_data). For non Siemens scanners we have trusted the GDC perfomred by the scanner  and can turn this off.
+GDC (gradient non linearity corrections) should be turned on for SIEMNS scanners. (The scanner coeff files should be copied into bb_data). For non Siemens scanners we have trusted the GDC performed by the scanner and can turn this off.
 
 *bb_pipeline.py subjectFolder*
 
@@ -33,10 +33,6 @@ Finally,  add the following "UKBiobank.RData." for FIX (BIANCA files already don
 
 Input Requirements
 ------------------
-
-There are now scrpits to do this whih can be found in bb_prepipeline_scripts. Follow instructions there to automatically prepare data for pipeline.
-
-Below is a summary of what the scripts are doing.
 
 The pipeline assumes NIFTI inputs with a specific filename convention. Therefore, it is recommended to perform `Dicom to Nifti conversion` in a certain way using `dcm2niix`. The recommended call is:
 
@@ -51,3 +47,10 @@ Finally, the pipeline expects that all b-value entries in the .bval files are in
 *  **FMRI resting-state**: A single nifti file with all fMRI volumes is expected and the input filename should contain '\*FMRI\*RESTING*.nii.gz'. The corresponding .json files should have an entry ""EffectiveEchoSpacing" with the Echo spacing in seconds (i.e. a line inserted like for example: "EffectiveEchoSpacing": 0.00054, ).
 
 `dcm2niix and Philips dMRI incompatibility!!` It looks that the latest versions of Philips software and dcm2niix induce a weird behaviour. Once nifti conversion is performed for dMRI data, the sequence of volumes is flipped compared to the acquisition (i.e. last acquired volume appears first in the nifti and so forth). This is OK in general, but could create issues for distortion correction tools that typically assume that the first volume of a dMRI scan is a b=0. To avoid strange behaviour of scripts, take the last volume (which will be a b=0) and put it at the beginning of the dMRI file (changing accordingly the respective entries of the .bval and .bvec file)
+
+**NODDI cuDIMOT**
+
+NODDI (Watson) cudDIOMOT tool is used to give NODDI outputs.
+
+Installation instructions found at: https://users.fmrib.ox.ac.uk/~moisesf/cudimot/Installation.html and save the "bin" folder in the following path:  
+*export CUDIMOT="${BB_BIN_DIR}/bb_diffusion_pipeline/bb_NODDI_cuDIMOT"*
