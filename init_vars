@@ -31,22 +31,33 @@
 pyVersion="3.5.1"
 
 
+#TO BE MODIFIED BY USER # Set to 1 if scanner is Siemens and set to 0 if non-siemens vendors
+export Siemens_status=0  
+export Phillips_status=0
+export GE_status=1
 
-#Pipeline paramters
-export GDC_Status=0                        #0 = GDC OFF, 1 = GDC ON
-export Grad_file=FMRIB_Prisma_coeff.grad
+#TO BE MODIFIED BY USER # Specifies which part of the pipeline is going to run
+export Structural_status=1
+export Functional_status=0
+export Diffusion_status=0
+
+#TO BE MODIFIED BY USER #  depending on which Siemens scanner is being used
+# uncomment depending on which scanner is being used and direct variable to location of .grad file
+if [ $Siemens_status = 1 ] ; then
+ export bb_GDC_coeff=FMRIB_Prisma_coeff.grad; echo Siemens scanner, GDC is on, using GDC coefficeints for Prisma_FMRIB
+ #export bb_GDC_coeff=OHBA_Prisma_coeff.grad; echo Siemens scanner GDC is on, usig GDC coefficeints for Prisma_OHBA
+ #export bb_GDC_coeff=OCMR_Trio_coeff.grad; echo Siemens scanner GDC is on, usig GDC coefficeints for OCMR_Trio
+ echo Individual coils for SWI
+fi
+
 
 #sourcing set up file for swi
 source /home/ppxan2/UK_biobank_pipeline/bb_structural_pipeline/bb_swi_dir/settings.sh
 
-if [ $GDC_Status = 0 ] ; then
-  echo GDC is off
-else
-  echo GDC is on
-fi
+
 
 #SETUP FSL
-export FSLDIR=/usr/local/fsl                #TO BE MODIFIED BY USER
+export FSLDIR=/usr/local/fsl-6.0.3                #TO BE MODIFIED BY USER
 . $FSLDIR/etc/fslconf/fsl.sh
 export FSLCONFDIR=${FSLDIR}/config
 export FSLOUTPUTTYPE="NIFTI_GZ"
@@ -94,5 +105,42 @@ export PATH=$BB_BIN_DIR/bb_pipeline_tools/:$BB_BIN_DIR/bb_general_tools/:$PATH
 MCRROOT="/usr/local/mcr/v93"                                                #TO BE MODIFIED BY USER
 export LD_LIBRARY_PATH=${MCRROOT}/runtime/glnxa64:${MCRROOT}/bin/glnxa64:${MCRROOT}/sys/os/glnxa64:$LD_LIBRARY_PATH
 
+#SET ENVIRONMENT VARIABLE FOR NODDI_CUDIMOT
+export CUDIMOT="${BB_BIN_DIR}/bb_diffusion_pipeline/bb_NODDI_cuDIMOT"
+
 #ACTIVATE BIOBANK'S PYTHON VERSION
 . $BB_BIN_DIR/bb_python/bb_python/bin/activate
+
+#Messages to print to user
+
+#GDC ON for SIEMENS scanners and OFF for NON SIEMENS
+if [ $Siemens_status = 1 ]; then
+  export GDC_Status=1                        #0 = GDC OFF, 1 = GDC ON
+else
+  export GDC_Status=0
+fi
+
+if [ $Phillips_status = 1 ] ; then
+  echo Phillips scanner, GDC is off, Pre-combined coils for SWI
+elif [ $GE_status = 1 ]; then
+  echo GE scanner, GDC is off, Pre-combined, Pre-filtered coils for SWI
+fi
+
+
+if [ $Structural_status = 1 ] ; then
+  echo Structural pipeline: Scheduled to run
+else
+  echo Structural pipeline: Scheduled NOT to run
+fi
+
+if [ $Functional_status = 1 ] ; then
+  echo Functional pipeline: Scheduled to run
+else
+  echo Functional pipeline: Scheduled NOT to run
+fi
+
+if [ $Diffusion_status = 1 ] ; then
+  echo Diffusion pipeline: Scheduled to run
+else
+  echo Diffusion pipeline: Scheduled NOT to run
+fi
