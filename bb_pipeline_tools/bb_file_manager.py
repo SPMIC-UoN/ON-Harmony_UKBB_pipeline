@@ -30,7 +30,7 @@ import nibabel as nib
 import bb_logging_tool as LT
 import bb_general_tools.bb_path as bb_path
 from subprocess import check_output
-
+ 
 # TODO: Create an image class to avoid reading the json file on each check?
 
 logger = None
@@ -283,11 +283,12 @@ def manage_fMRI(listFiles, flag):
             move_file_add_to_config(listFiles[indBiggestImage], flag, False)
 
             # If the other image is an SBRef image
-            if dim[indSmallestImage] == 1:
+            if dim[indSmallestImage] == 1 and os.environ["Ignore_fmri_SBREF"] == '0':
                 move_file_add_to_config(listFiles[indSmallestImage], flag + "_SBRef", False)
 
             # If not, forget about it and generate and SBRef
             else:
+                move_file(listFiles[indSmallestImage], "unclassified/" + flag + "_SBRef.nii.gz")
                 generate_SBRef(idealConfig[flag], idealConfig[flag + "_SBRef"])
                 fileConfig[flag + "_SBRef"] = idealConfig[flag + "_SBRef"]
 
@@ -432,88 +433,123 @@ def manage_DWI(listFiles):
 
 
 def manage_SWI(listFiles):
-    listFiles = robustSort(listFiles)
-    numFiles = len(listFiles)
+    #Should go through these checks iff the data being read in is Siemens data
+    if os.environ["Siemens_status"] == '1':
 
-    # TODO: Find all files with actual coil info
+        listFiles = robustSort(listFiles)
+        numFiles = len(listFiles)
 
-    if numFiles <= 133:
-        logger.error(
-            "There should be at least 134 SWI files. Only " + str(numFiles) + " found. There will be no SWI processing")
+        # TODO: Find all files with actual coil info
 
-    elif numFiles > 134:
-        logger.error("The number of SWI files (" + str(numFiles) + ") is incorrect. There will be no processing")
+        if numFiles <= 133:
+            logger.error(
+                "There should be at least 134 SWI files. Only " + str(numFiles) + " found. There will be no SWI processing")
 
-    else:
-        mainFiles = [x for x in listFiles if ("_COIL_" in x)]
-
-        numMainFiles = len(mainFiles)
-
-        for mainFile in mainFiles:
-            listFiles.remove(mainFile)
-
-        for key in ["SWI_MAG_TE1", "SWI_MAG_TE2", "SWI_PHA_TE1", "SWI_PHA_TE2"]:
-            fileConfig[key] = []
-
-        # Classifying coil files
-        for fileName in listFiles:
-
-            boolPhase = is_phase(fileName)
-            # boolPhase= bb_path.removeImageExt(fileName).endswith('_PHA')
-            boolTE1 = (fileName.find('_ECHO1_') != -1)
-
-            if boolPhase:
-                if boolTE1:
-                    move_file_add_to_config(fileName, "SWI_PHA_TE1", True)
-                else:
-                    move_file_add_to_config(fileName, "SWI_PHA_TE2", True)
-
-            else:
-                if boolTE1:
-                    move_file_add_to_config(fileName, "SWI_MAG_TE1", True)
-
-                else:
-                    move_file_add_to_config(fileName, "SWI_MAG_TE2", True)
-
-        # Classifying SWI files
-        # is_phase function does not work due to SWI acquisition not complying with standard
-        # DICOM configuration and hence, dcm2niix does not get the phase properly
-        notNormMagFiles = [mainFile for mainFile in mainFiles if
-                           ((not is_normalised(mainFile)) and (not (bb_path.removeImageExt(mainFile).endswith('_PH'))))]
-
-        if len(notNormMagFiles) != 2:
-            logger.warn("There should be 2 not normalised SWI files. SWI data will not be processed")
-            for mainFile in mainFiles:
-                if os.path.isfile(mainFile):
-                    move_file(mainFile, "SWI/unclassified/" + mainFile)
+        elif numFiles > 134:
+            logger.error("The number of SWI files (" + str(numFiles) + ") is incorrect. There will be no processing")
 
         else:
-            for notNormMagFile in notNormMagFiles:
-                if (notNormMagFile.find('_ECHO1_') != -1):
-                    move_file_add_to_config(notNormMagFile, "SWI_TOTAL_MAG_notNorm", False)
-                else:
-                    move_file_add_to_config(notNormMagFile, "SWI_TOTAL_MAG_notNorm_TE2", False)
+            mainFiles = [x for x in listFiles if ("_COIL_" in x)]
 
-                mainFiles.remove(notNormMagFile)
+            numMainFiles = len(mainFiles)
 
             for mainFile in mainFiles:
+                listFiles.remove(mainFile)
 
-                # boolPhase=is_phase(mainFile)
-                boolPhase = bb_path.removeImageExt(mainFile).endswith('_PH')
-                boolTE1 = (mainFile.find('_ECHO1_') != -1)
+            for key in ["SWI_MAG_TE1", "SWI_MAG_TE2", "SWI_PHA_TE1", "SWI_PHA_TE2"]:
+                fileConfig[key] = []
+
+            # Classifying coil files
+            for fileName in listFiles:
+
+                boolPhase = is_phase(fileName)
+                # boolPhase= bb_path.removeImageExt(fileName).endswith('_PHA')
+                boolTE1 = (fileName.find('_ECHO1_') != -1)
 
                 if boolPhase:
                     if boolTE1:
-                        move_file_add_to_config(mainFile, "SWI_TOTAL_PHA", False)
+                        move_file_add_to_config(fileName, "SWI_PHA_TE1", True)
                     else:
-                        move_file_add_to_config(mainFile, "SWI_TOTAL_PHA_TE2", False)
+                        move_file_add_to_config(fileName, "SWI_PHA_TE2", True)
 
                 else:
                     if boolTE1:
-                        move_file_add_to_config(mainFile, "SWI_TOTAL_MAG", False)
+                        move_file_add_to_config(fileName, "SWI_MAG_TE1", True)
 
                     else:
-                        move_file_add_to_config(mainFile, "SWI_TOTAL_MAG_TE2", False)
+                        move_file_add_to_config(fileName, "SWI_MAG_TE2", True)
+
+            # Classifying SWI files
+            # is_phase function does not work due to SWI acquisition not complying with standard
+            # DICOM configuration and hence, dcm2niix does not get the phase properly
+            notNormMagFiles = [mainFile for mainFile in mainFiles if
+                               ((not is_normalised(mainFile)) and (not (bb_path.removeImageExt(mainFile).endswith('_PH'))))]
+
+            if len(notNormMagFiles) != 2:
+                logger.warn("There should be 2 not normalised SWI files. SWI data will not be processed")
+                for mainFile in mainFiles:
+                    if os.path.isfile(mainFile):
+                        move_file(mainFile, "SWI/unclassified/" + mainFile)
+
+            else:
+                for notNormMagFile in notNormMagFiles:
+                    if (notNormMagFile.find('_ECHO1_') != -1):
+                        move_file_add_to_config(notNormMagFile, "SWI_TOTAL_MAG_notNorm", False)
+                    else:
+                        move_file_add_to_config(notNormMagFile, "SWI_TOTAL_MAG_notNorm_TE2", False)
+
+                    mainFiles.remove(notNormMagFile)
+
+                for mainFile in mainFiles:
+
+                    # boolPhase=is_phase(mainFile)
+                    boolPhase = bb_path.removeImageExt(mainFile).endswith('_PH')
+                    boolTE1 = (mainFile.find('_ECHO1_') != -1)
+
+                    if boolPhase:
+                        if boolTE1:
+                            move_file_add_to_config(mainFile, "SWI_TOTAL_PHA", False)
+                        else:
+                            move_file_add_to_config(mainFile, "SWI_TOTAL_PHA_TE2", False)
+
+                    else:
+                        if boolTE1:
+                            move_file_add_to_config(mainFile, "SWI_TOTAL_MAG", False)
+
+                        else:
+                            move_file_add_to_config(mainFile, "SWI_TOTAL_MAG_TE2", False)
+
+
+def manage_SWI_pre_combined(listFiles):
+
+    listFiles = robustSort(listFiles)
+    numFiles = len(listFiles)
+
+    mainFiles = [x for x in listFiles if ("_COIL_" in x)]
+
+    numMainFiles = len(mainFiles)
+
+    for fileName in listFiles:
+
+        boolPhase = bb_path.removeImageExt(fileName).endswith('_PH')
+        boolPhase_GE = bb_path.removeImageExt(fileName).startswith('FILT')
+        boolTE1 = (fileName.find('_ECHO1_') != -1)
+        logger.info("Current fileName is " + fileName)
+        if boolPhase or boolPhase_GE:
+            if boolTE1:
+                move_file(fileName, "SWI/SWI_TOTAL_PHA.nii.gz")
+            else:
+                move_file(fileName, "SWI/SWI_TOTAL_PHA_TE2.nii.gz")
+
+        else:
+            if boolTE1:
+                move_file(fileName, "SWI/SWI_TOTAL_MAG.nii.gz")
+
+            else:
+                move_file(fileName, "SWI/SWI_TOTAL_MAG_TE2.nii.gz")
+
+    #patterns_actions = [["FILT*SWI*.nii.gz","SWI*nii.gz"], move_to, "SWI/"],
+
 
 
 def bb_file_manager(subject):
@@ -526,21 +562,42 @@ def bb_file_manager(subject):
     with open(idealConfigFile, 'r') as f:
         idealConfig = json.load(f)
 
-    directories = ["delete", "unclassified", "raw", "T1", "T2_FLAIR", "SWI",
+    if os.environ["Siemens_status"] == '1':
+
+        directories = ["delete", "unclassified", "raw", "T1", "T2_FLAIR", "SWI",
                    "SWI/PHA_TE1", "SWI/PHA_TE2", "SWI/MAG_TE1", "SWI/MAG_TE2",
                    "SWI/unclassified", "dMRI", "dMRI/raw", "fMRI", "fieldmap"]
 
-    patterns_actions = [[["*.*"], capitalize_and_clean],
-                        [["dicom", "DICOM"], move_to, "delete/"],
-                        [["T1*.nii.gz"], manage_struct, "T1"],
-                        [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
-                        [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI"],
-                        [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI"],
-                        [["SWI*nii.gz"], manage_SWI],
-                        [["DIFF_*", "MB3_*"], manage_DWI],
-                        [["SWI*.*"], move_to, "SWI/unclassified/"],
-                        [["*.*"], move_to, "unclassified/"]
-                        ]
+        patterns_actions = [[["*.*"], capitalize_and_clean],
+                            [["dicom", "DICOM"], move_to, "delete/"],
+                            [["T1*.nii.gz"], manage_struct, "T1"],
+                            [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
+                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI"],
+                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI"],
+                            [["SWI*nii.gz"], manage_SWI],
+                            [["DIFF_*", "MB3_*"], manage_DWI],
+                            [["SWI*.*"], move_to, "SWI/unclassified/"],
+                            [["*.*"], move_to, "unclassified/"]
+                            ]
+
+    else:
+
+        directories = ["delete", "unclassified", "raw", "T1", "T2_FLAIR", "SWI","SWI/unclassified",
+                      "dMRI", "dMRI/raw", "fMRI", "fieldmap"]
+
+        patterns_actions = [[["*.*"], capitalize_and_clean],
+                            [["dicom", "DICOM"], move_to, "delete/"],
+                            [["T1*.nii.gz"], manage_struct, "T1"],
+                            [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
+                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI"],
+                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI"],
+                            [["FILT*SWI*.nii.gz","SWI*nii.gz"], manage_SWI_pre_combined],
+                            [["DIFF_*", "MB3_*"], manage_DWI],
+                            [["SWI*.*"], move_to, "SWI/unclassified/"],
+                            [["*.*"], move_to, "unclassified/"]
+                            ]
+
+
     # os.chdir(subject)
     os.chdir(os.environ["subject"] + '/' + subject)
     fd_fileName = "logs/file_descriptor.json"
@@ -580,4 +637,3 @@ def bb_file_manager(subject):
     fileConfigFormatted = formatFileConfig()
 
     return fileConfig
-
