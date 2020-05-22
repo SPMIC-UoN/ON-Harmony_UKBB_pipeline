@@ -45,8 +45,8 @@ class Usage(Exception):
     def __init__(self, msg):
         self.msg = msg
 
-def main(): 
-  
+def main():
+
     parser = MyParser(description='BioBank Pipeline Manager')
     parser.add_argument("subjectFolder", help='Subject Folder')
 
@@ -57,10 +57,10 @@ def main():
 
     if subject[-1] =='/':
         subject = subject[0:len(subject)-1]
-    
+
     logger = LT.initLogging(__file__, subject)
 
-    logger.info('Running file manager') 
+    logger.info('Running file manager')
     fileConfig = bb_file_manager(subject)
     fileConfig = bb_basic_QC(subject, fileConfig)
 
@@ -71,22 +71,26 @@ def main():
         logger.error("There is no proper DWI data. Thus, the B0 file cannot be generated in order to run topup")
         runTopup = False
     else:
-        runTopup = True    
+        runTopup = True
 
     # Default value for job id. SGE does not wait for a job with this id.
     jobSTEP1 = "-1"
     jobSTEP2 = "-1"
     jobSTEP3 = "-1"
 
-    jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig)
+    if os.environ["Structural_status"] == '1':
+        jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig)
 
-    if runTopup:
+
+    #if runTopup:
+    if os.environ["Functional_status"] == '1':
         jobSTEP2 = bb_pipeline_func(subject, jobSTEP1, fileConfig)
+    if os.environ["Diffusion_status"] == '1':
         jobSTEP3 = bb_pipeline_diff(subject, jobSTEP1, fileConfig)
-        
+
     jobSTEP4 = bb_IDP(subject, jobSTEP1 + "," + jobSTEP2 + "," + jobSTEP3, fileConfig)
 
     LT.finishLogging(logger)
-             
+
 if __name__ == "__main__":
     main()
