@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Script name: bb_IDP_diff_autoPtx
+# Script name: bb_IDP_diff_xtract
 #
-# Description: Script to generate the IDPs related to tracts with autoPtx
+# Description: Script to generate the IDPs related to tracts with xtract
 #
 # Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
 #
@@ -48,7 +48,7 @@ result=""
 allgood=1
 for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
 #for i in FA MD MO L1 L2 L3 ; do
-  if [ ! -f $basedMRI/xtract_preproc/APTX_${i}.txt ] || [ `cat $basedMRI/xtract_preproc/APTX_${i}.txt | wc -w` != 42 ] ; then
+  if [ ! -f $basedMRI/xtract_preproc/XTRCT_${i}.txt ] || [ `cat $basedMRI/xtract_preproc/XTRCT_${i}.txt | wc -w` != 42 ] ; then
     allgood=0
   fi
 done
@@ -80,7 +80,7 @@ if [ $allgood = 0 ] ; then
     if [ -f $basedMRI/xtract_preproc/tmp_all.nii.gz ] ; then
       for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
       #for i in FA MD MO L1 L2 L3 ; do
-          /bin/rm -f $basedMRI/xtract_preproc/APTX_${i}.txt
+          /bin/rm -f $basedMRI/xtract_preproc/XTRCT_${i}.txt
           if [ -f $basedMRI/TBSS/stats/all_${i}.nii.gz ] ; then
               fslmaths $basedMRI/xtract_preproc/tmp_all -mul $basedMRI/TBSS/stats/all_${i} $basedMRI/xtract_preproc/tmp
               tractmeas=`fslstats -t $basedMRI/xtract_preproc/tmp -m | sed 's/-/_/g'`
@@ -88,7 +88,7 @@ if [ $allgood = 0 ] ; then
               for (( j=1; j <= $jmax; ++j )) ; do
                 tm=`echo $tractmeas | cut -d " " -f$j`
                 tn=`echo $tractnorm | cut -d " " -f$j`
-                echo "10 k $tm $tn / p" | dc - >> $basedMRI/xtract_preproc/APTX_${i}.txt
+                echo "10 k $tm $tn / p" | dc - >> $basedMRI/xtract_preproc/XTRCT_${i}.txt
               done
           fi
         done
@@ -101,8 +101,8 @@ fi
 
 for i in FA MD MO L1 L2 L3 ICVF OD ISOVF ; do
 #for i in FA MD MO L1 L2 L3 ; do
-  if [ -f $basedMRI/xtract_preproc/APTX_${i}.txt ] && [ `cat $basedMRI/xtract_preproc/APTX_${i}.txt | wc -w` = 42 ] ; then
-    miniResult=`cat $basedMRI/xtract_preproc/APTX_${i}.txt`
+  if [ -f $basedMRI/xtract_preproc/XTRCT_${i}.txt ] && [ `cat $basedMRI/xtract_preproc/XTRCT_${i}.txt | wc -w` = 42 ] ; then
+    miniResult=`cat $basedMRI/xtract_preproc/XTRCT_${i}.txt`
   else
     miniResult="$nanResult"
   fi
