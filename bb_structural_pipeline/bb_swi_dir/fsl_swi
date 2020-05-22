@@ -25,5 +25,10 @@
 FSL_SWIDIR=$( cd $(dirname $0) ; pwd)
 . ${FSL_SWIDIR}/settings.sh
 
-${FSL_SWIDIR}/call_matlab.sh -l $1/logs/bb_swi_matlab_$2.log -f swiProcessing $1
-
+if [ $Siemens_status = 1 ]; then
+  ${FSL_SWIDIR}/call_matlab.sh -l $1/logs/bb_swi_matlab_Siemens_$2.log -f swiProcessing_Siemens $1
+elif [ $Phillips_status = 1 ] ; then
+  ${FSL_SWIDIR}/call_matlab.sh -l $1/logs/bb_swi_matlab_Phillips_$2.log -f swiProcessing_Phillips $1
+elif [ $GE_status = 1 ] ; then
+  ${FSL_SWIDIR}/call_matlab.sh -l $1/logs/bb_swi_matlab_GE_$2.log -f swiProcessing_GE $1
+fi
