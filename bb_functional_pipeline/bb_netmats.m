@@ -51,6 +51,8 @@ function bb_netmats(subj, general_subj_dir)
         netmats1=  nets_netmats(ts,-r2zFULL,'corr');
         netmats2=  nets_netmats(ts,-r2zPARTIAL,'ridgep',0.5);
      
+        dlmwrite(sprintf('rfMRI_d%s_fullcorr_v1_square.txt',D),netmats1) % Saves the connectivity matrix as the full square for easy visualisation  
+        
         clear NET; 
 
         grot=reshape(netmats1(1,:),ts.Nnodes,ts.Nnodes); 
@@ -75,5 +77,7 @@ function bb_netmats(subj, general_subj_dir)
 
         fprintf(po,[num2str(ts_std(1,:),'%14.8f') '\n']);  
         fclose(po);
+        
+        dlmwrite(sprintf('rfMRI_d%s_nodeAmplitudes.txt',D),ts_std) % Saves the node amplitudes in a comma separated way for ease of plotting  
 
     end
