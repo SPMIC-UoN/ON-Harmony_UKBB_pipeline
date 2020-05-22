@@ -8,7 +8,7 @@
 #
 #   SHCOPYRIGHT
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
 
 # All fix settings are held in the settings.sh file - edit this file to suit your setup
 . ${FSL_FIXDIR}/settings.sh
@@ -18,13 +18,20 @@ origDir=`pwd`
 
 [ "$1" = "" ] && exit
 
-if [ -d $1/fMRI/rfMRI.ica ] ; then 
+if [ -d $1/fMRI/rfMRI.ica ] ; then
 
     cd $1/fMRI/rfMRI.ica
 
     ${FSLDIR}/bin/imcp ../../T1/T1_fast/T1_brain_pveseg reg/highres_pveseg
     ${FSLDIR}/bin/invwarp --ref=reg/example_func -w reg/example_func2standard_warp -o reg/standard2example_func_warp
-    ${FSL_FIXDIR}/fix . ${FSL_FIXDIR}/training_files/UKBiobank.RData 20 -m -h 100
+
+    if [ $fmri_denoising = 0 ] ; then
+     imcp filtered_func_data filtered_func_data_clean
+    elif [ $fmri_denoising = 1 ] ; then
+      ${FSL_FIXDIR}/fix . ${FSL_FIXDIR}/training_files/UKBiobank.RData 20 -m -h 100
+    elif [ $fmri_denoising = 2 ] ; then
+      echo yet to implement
+    fi
 
     mkdir -p reg_standard
     ${FSLDIR}/bin/applywarp --ref=reg/standard --in=filtered_func_data_clean --out=reg_standard/filtered_func_data_clean --warp=reg/example_func2standard_warp --interp=spline
@@ -37,5 +44,4 @@ else
     echo "No rfMRI directory for subject $1"
 fi
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
-
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
