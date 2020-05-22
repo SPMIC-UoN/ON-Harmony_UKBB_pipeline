@@ -32,13 +32,13 @@ execPath=`dirname $0`
 
 
 if [ "$3" == "" ]; then
-    MNI_to_FA_warp=../TBSS/FA/MNI_to_dti_FA_warp.nii.gz
+    MNI_to_FA_warp=TBSS/FA/MNI_to_dti_FA_warp.nii.gz
 else
-	MNI_to_FA_warp=$3git
+	MNI_to_FA_warp=$3
 fi
 
 if [ "$4" == "" ]; then
-    FA_to_MNI_warp=../TBSS/FA/dti_FA_to_MNI_warp.nii.gz
+    FA_to_MNI_warp=TBSS/FA/dti_FA_to_MNI_warp.nii.gz
 else
 	FA_to_MNI_warp=$4
 fi
@@ -47,7 +47,7 @@ direc=$PWD/$1/dMRI
 
 cd $direc
 
-/home/ppxan2/xtract-master/xtract -bpx dMRI.bedpostX -out xtract_preproc -species HUMAN -stdwarp $MNI_to_FA_warp $FA_to_MNI_warp -gpu
+$FSLDIR/bin/xtract -bpx dMRI.bedpostX -out xtract_preproc -species HUMAN -stdwarp $MNI_to_FA_warp $FA_to_MNI_warp -gpu
 
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
 
