@@ -2,7 +2,7 @@
 #
 # Script name: bb_pipeline_struct.py
 #
-# Description: Script with the structural pipeline. 
+# Description: Script with the structural pipeline.
 #			   This script will call the rest of structural functions.
 #
 # Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
@@ -37,38 +37,39 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration):
     if (not 'T1' in fileConfiguration) or (fileConfiguration['T1'] == ''):
         logger.error('There is no T1. Subject ' + subject + ' cannot be processed.')
         return -1
-    
+
     else:
         #TODO: Adapt code to good syntax practices --> PEP 8
 
         # Create the B0 AP - PA file to estimate the fieldmaps
-        b0_threshold=int(np.loadtxt(os.environ['BB_BIN_DIR'] + "/bb_data/b0_threshold.txt"))   
+        b0_threshold=int(np.loadtxt(os.environ['BB_BIN_DIR'] + "/bb_data/b0_threshold.txt"))
 
         jobsB0=[]
 
         if runTopup:
             for encDir in ['AP', 'PA']:
-                bvals=np.loadtxt(subject +"/dMRI/raw/" + encDir + ".bval")                
+                bvals=np.loadtxt(subject +"/dMRI/raw/" + encDir + ".bval")
                 numVols=int(sum(bvals<=b0_threshold))
 
-                #numVols= LT.runCommand(logger, "for f in `cat " + subject +"/dMRI/raw/" + encDir + ".bval` ; do echo $f; done | awk '{if($1==$1+0 && $1 < " + b0_threshold + " ) print $1}' |wc | awk '{print $1}'")            
+                #numVols= LT.runCommand(logger, "for f in `cat " + subject +"/dMRI/raw/" + encDir + ".bval` ; do echo $f; done | awk '{if($1==$1+0 && $1 < " + b0_threshold + " ) print $1}' |wc | awk '{print $1}'")
                 jobGETB01 = LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "bb_get_b0s_1_'       + subject + '" -l ' + logDir + ' $BB_BIN_DIR/bb_structural_pipeline/bb_get_b0s.py -i ' + subject + '/dMRI/raw/' + encDir + '.nii.gz -o ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz -n ' + str(numVols) + ' -l ' + str(b0_threshold) )
                 jobsB0.append(LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 20 -N "bb_choose_bestB0_1_' + subject + '" -l ' + logDir + ' -j ' + jobGETB01  + ' $BB_BIN_DIR/bb_structural_pipeline/bb_choose_bestB0 ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz ' + subject + '/fieldmap/B0_' + encDir + '.nii.gz '))
 
             jobMERGE = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5 -N "bb_fslmerge_' + subject + '" -j ' + ",".join(jobsB0) +' -l ' + logDir + ' ${FSLDIR}/bin/fslmerge -t ' + subject + '/fieldmap/B0_AP_PA ' + subject + '/fieldmap/B0_AP ' + subject + '/fieldmap/B0_PA')
 
         # Registrations - T1 to MNI - T2 to T1 - T2 to MNI (Combining the 2 previous ones)
-        jobSTRUCTINIT = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 850 -N "bb_structinit_' + subject + '" -l ' + logDir + '  $BB_BIN_DIR/bb_structural_pipeline/bb_struct_init ' + subject  )        
+        jobSTRUCTINIT = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 850 -N "bb_structinit_' + subject + '" -l ' + logDir + '  $BB_BIN_DIR/bb_structural_pipeline/bb_struct_init ' + subject  )
 
+        if os.environ["SWI_status"] == '1':
         #TODO: Do a better check here. This one looks arbitrary
-        if 'SWI_TOTAL_MAG_TE2' in fileConfiguration:
             jobSWI = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 90 -N "bb_swi_reg_' + subject + '" -l ' + logDir + ' -j ' + jobSTRUCTINIT + '  $BB_BIN_DIR/bb_structural_pipeline/bb_swi_reg ' + subject  )
+
 
         # Topup
         if runTopup:
             jobPREPAREFIELDMAP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5 -N "bb_prepare_struct_fieldmap_' + subject + '" -l ' + logDir + ' -j ' + jobMERGE + ' $BB_BIN_DIR/bb_structural_pipeline/bb_prepare_struct_fieldmap ' + subject )
             jobTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 90 -N "bb_topup_' + subject + '" -l ' + logDir + ' -j ' + jobPREPAREFIELDMAP + ' ${FSLDIR}/bin/topup --imain=' + subject + '/fieldmap/B0_AP_PA --datain=' + subject + '/fieldmap/acqparams.txt --config=b02b0.cnf --out=' + subject + '/fieldmap/fieldmap_out --fout=' + subject + '/fieldmap/fieldmap_fout --jacout=' + subject + '/fieldmap/fieldmap_jacout -v')
-            
+
         else:
             logger.error("There is not enough/correct DWI data. Topup cannot be run. fMRI and DWI cannot be run")
 
@@ -79,5 +80,5 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration):
             return ",".join([jobSTRUCTINIT, jobSWI])
         else:
             jobPOSTTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_topup_' + subject + '" -l ' + logDir + ' -j ' + jobTOPUP + ',' + jobSTRUCTINIT + ',' + jobSWI + ' $BB_BIN_DIR/bb_structural_pipeline/bb_post_topup ' + subject )
-            return jobPOSTTOPUP
 
+        return jobPOSTTOPUP
