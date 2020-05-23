@@ -79,7 +79,7 @@ InputFile=`getopt1 "--in" $@`  # "$2"
 OutputFile=`getopt1 "--out" $@`  # "$3"
 OutputTransform=`getopt1 "--owarp" $@`  # "$4"
 
-InputCoefficients="$BB_BIN_DIR/bb_data/${bb_GDC_coef}"
+InputCoefficients="$BB_BIN_DIR/bb_data/$bb_GDC_coeff"
 
 # default parameters
 OutputFile=`${FSLDIR}/bin/remove_ext ${OutputFile}`
