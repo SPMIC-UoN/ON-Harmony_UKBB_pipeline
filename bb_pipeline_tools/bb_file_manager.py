@@ -30,7 +30,7 @@ import nibabel as nib
 import bb_logging_tool as LT
 import bb_general_tools.bb_path as bb_path
 from subprocess import check_output
- 
+
 # TODO: Create an image class to avoid reading the json file on each check?
 
 logger = None
@@ -445,7 +445,8 @@ def manage_SWI(listFiles):
             logger.error(
                 "There should be at least 134 SWI files. Only " + str(numFiles) + " found. There will be no SWI processing")
 
-        elif numFiles > 134:
+        #edited this value to accomodate for PRISMA_OHBA which has
+        elif numFiles > 428:
             logger.error("The number of SWI files (" + str(numFiles) + ") is incorrect. There will be no processing")
 
         else:
