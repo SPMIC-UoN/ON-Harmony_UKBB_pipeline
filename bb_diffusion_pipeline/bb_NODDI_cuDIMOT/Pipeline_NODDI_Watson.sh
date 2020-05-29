@@ -38,6 +38,8 @@ Usage() {
     echo "expects to find data and nodif_brain_mask in subject directory"
     echo ""
     echo "<options>:"
+    echo "-Q (name of the GPU(s) queue, default cuda.q (defined in environment variable: FSLGECUDAQ)"
+    echo "-NJOBS (number of jobs to queue, the data is divided in NJOBS parts, usefull for a GPU cluster, default 4)"
     echo "--runMCMC (if you want to run MCMC)"
     echo "-b (burnin period, default 5000)"
     echo "-j (number of jumps, default 1250)"
@@ -67,7 +69,7 @@ echo subjectdir is $subjdir
 start=`date +%s`
 
 #parse option arguments
-njobs=1
+njobs=4
 burnin=1000
 njumps=1250
 sampleevery=25
@@ -79,6 +81,8 @@ shift
 while [ ! -z "$1" ]
 do
   case "$1" in
+      -Q) queue="-q $2";shift;;
+      -NJOBS) njobs=$2;shift;;
       -b) burnin=$2;shift;;
       -j) njumps=$2;shift;;
       -s) sampleevery=$2;shift;;
@@ -89,12 +93,13 @@ do
   shift
 done
 
-unset SGE_ROOT
-
 #Set options
 opts="--bi=$burnin --nj=$njumps --se=$sampleevery"
 opts="$opts $other"
 
+if [ "x$SGE_ROOT" != "x" ]; then
+	queue="-q $FSLGECUDAQ"
+fi
 
 #check that all required files exist
 
@@ -171,7 +176,7 @@ echo ${subjdir}.${modelname}/S0 >> $FixPFile
 ##############################################################################
 ################################ First Dtifit  ###############################
 ##############################################################################
-echo "Run Dtifit"
+echo "Queue Dtifit"
 PathDTI=${subjdir}.${modelname}/Dtifit
 dtifit_command="${bindir}/Run_dtifit.sh ${subjdir} ${subjdir}.${modelname} ${bindir}"
 #SGE
