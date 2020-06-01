@@ -29,7 +29,10 @@ GDC (gradient non linearity corrections) should be turned on for SIEMNS scanners
 
 where subjectFolder contains the input NIFTI files for a given subject.
 
-Finally,  add the following "UKBiobank.RData." for FIX (BIANCA files already done) from https://www.fmrib.ox.ac.uk/ukbiobank/fbp.
+
+The folling bmri_group_means.zip should be downloaded from http://biobank.ctsu.ox.ac.uk/showcase/refer.cgi?id=9028 and extracted into the following directory bb_functional_pipeline/bb_fslnets
+
+Finally,  add the following "UKBiobank.RData." for FIX (BIANCA files already done) from https://www.fmrib.ox.ac.uk/ukbiobank/fb into templates/group folder.
 
 Input Requirements
 ------------------
