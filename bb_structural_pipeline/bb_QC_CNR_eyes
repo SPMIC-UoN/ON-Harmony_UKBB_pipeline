@@ -37,25 +37,25 @@ T1=$1/raw/T1_notNorm
 if [ x`imtest $T1_cut` = x1 ] ; then
 
     if [ x`imtest $T1` = x1 ] ; then
-        
+
         if [ x`imtest $dir/T1_fast/T1_brain_pveseg` = x1 ] ; then
 
             if [ ! x`imtest $dir/T1_QC_eyes/T1_eyes_cuboid_mask.nii.gz` = x1 ] ; then
 
                 if [ ! x`imtest $dir/transforms/T1_orig_ud_warp.nii.gz` = x1 ] ; then
-                     $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$dir/grot_dir/ --in=$dir/T1_orig.nii.gz --out=$dir/grot.nii.gz --owarp=$dir/transforms/T1_orig_ud_warp.nii.gz
+                     $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$dir/grot_dir/ --in=$dir/T1_orig.nii.gz --out=$dir/grot.nii.gz --owarp=$dir/transforms/T1_orig_ud_warp.nii.gz --model=$2
                 fi
 
                 if [ ! x`imtest $dir/transforms/T1_orig_ud_warp_inv.nii.gz` = x1 ] ; then
                     ${FSLDIR}/bin/invwarp --ref=$dir/T1_orig -w $dir/transforms/T1_orig_ud_warp.nii.gz -o $dir/transforms/T1_orig_ud_warp_inv.nii.gz
                 fi
-                
+
                 if [ ! x`imtest $dir/T1_fast/T1_brain_GM_mask.nii.gz` = x1 ] ; then
                     fslmaths $dir/T1_fast/T1_brain_pve_1.nii.gz -thr 0.5 -bin $dir/T1_fast/T1_brain_GM_mask.nii.gz
                     fslmaths $dir/T1_fast/T1_brain_pve_2.nii.gz -thr 0.5 -bin $dir/T1_fast/T1_brain_WM_mask.nii.gz
                 fi
 
-               
+
                 ${FSLDIR}/bin/applywarp  -i $dir/T1_fast/T1_brain_GM_mask.nii.gz -o $dir/T1_fast/T1_brain_GM_mask_orig.nii.gz -r $dir/T1_orig.nii.gz -w $dir/transforms/T1_orig_ud_warp_inv.nii.gz --premat=$dir/transforms/T1_to_T1_orig_ud.mat --interp=nn
                 ${FSLDIR}/bin/applywarp  -i $dir/T1_fast/T1_brain_WM_mask.nii.gz -o $dir/T1_fast/T1_brain_WM_mask_orig.nii.gz -r $dir/T1_orig.nii.gz -w $dir/transforms/T1_orig_ud_warp_inv.nii.gz --premat=$dir/transforms/T1_to_T1_orig_ud.mat --interp=nn
 
@@ -66,7 +66,7 @@ if [ x`imtest $T1_cut` = x1 ] ; then
 
                 printf "%.0f %.0f %.0f %.0f %.0f %.0f" $(fslstats $dir/left_eye_flirted -C ; fslstats $dir/right_eye_flirted -C ;) > $dir/eyes_COG_coordinates.txt
 
-                
+
                 size="40"
                 halfsize=`echo $size / 2 | bc`
 
@@ -84,15 +84,15 @@ if [ x`imtest $T1_cut` = x1 ] ; then
 
                 mkdir -p $dir/T1_QC_eyes
 
-                mv $dir/T1_eyes_cuboid_mask.nii.gz  $dir/right_eye_flirted.nii.gz $dir/left_eye_flirted.nii.gz $dir/T1_QC_eyes 
-                
+                mv $dir/T1_eyes_cuboid_mask.nii.gz  $dir/right_eye_flirted.nii.gz $dir/left_eye_flirted.nii.gz $dir/T1_QC_eyes
+
                 rm  $dir/transforms/T1_orig_ud_warp_inv.nii.gz $dir/eyes_COG_coordinates.txt
 
             fi
 
             fslmaths $dir/T1_QC_eyes/T1_eyes_cuboid_mask -mul $T1 ${T1_cut}_grot_roi
 
-            #Calculate the noise in the slice 
+            #Calculate the noise in the slice
             subj=$1
 
             if [ -f $dir/T1_fast/T1_brain_GM_mask_orig.nii.gz ] ; then
@@ -107,9 +107,9 @@ if [ x`imtest $T1_cut` = x1 ] ; then
               TheBrain=`echo "1 k $TheGrey $TheWhite + 2 / p" | dc -`
               result=`echo "10 k $TheNoise $TheBrain / p" | dc -`
             fi
-            
-            rm  ${T1_cut}_grot_roi*nii.gz 
-             
+
+            rm  ${T1_cut}_grot_roi*nii.gz
+
             echo $result > ${T1_cut}_QC_CNR_eyes.txt
 
         fi ;
