@@ -39,6 +39,7 @@ Usage() {
   echo "              --in=<input image>"
   echo "              --out=<output image>"
   echo "              --owarp=<output warp>"
+  echo "              --model=<scanner model> "
 }
 
 # function for parsing options
@@ -78,8 +79,16 @@ WD=`getopt1 "--workingdir" $@`  # "$1"
 InputFile=`getopt1 "--in" $@`  # "$2"
 OutputFile=`getopt1 "--out" $@`  # "$3"
 OutputTransform=`getopt1 "--owarp" $@`  # "$4"
+model=`getopt1 "--model" $@`  # "$5"
 
-InputCoefficients="$BB_BIN_DIR/bb_data/$bb_GDC_coeff"
+if [ $model = 'Siemens_P1' ] ; then
+  InputCoefficients="$BB_BIN_DIR/bb_data/FMRIB_Prisma_coeff.grad"
+elif [ $model = 'Siemens_P2' ] ; then
+  InputCoefficients="$BB_BIN_DIR/bb_data/OHBA_Prisma_coeff.grad"
+elif [ $model = 'Siemens_T' ; then ]
+  InputCoefficients="$BB_BIN_DIR/bb_data/OCMR_Trio_coeff.grad"
+fi
+
 
 # default parameters
 OutputFile=`${FSLDIR}/bin/remove_ext ${OutputFile}`
