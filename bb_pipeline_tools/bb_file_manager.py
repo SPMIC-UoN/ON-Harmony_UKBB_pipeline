@@ -246,7 +246,7 @@ def manage_struct(listFiles, flag):
     # The flag parameter indicates whether this is resting or task fMRI
 
 
-def manage_fMRI(listFiles, flag):
+def manage_fMRI(listFiles, flag, Acquired_SBREF):
     listFiles = robustSort(listFiles)
     numFiles = len(listFiles)
     dim = []
@@ -283,7 +283,7 @@ def manage_fMRI(listFiles, flag):
             move_file_add_to_config(listFiles[indBiggestImage], flag, False)
 
             # If the other image is an SBRef image
-            if dim[indSmallestImage] == 1 and os.environ["Ignore_fmri_SBREF"] == '0':
+            if dim[indSmallestImage] == 1 and Acquired_SBREF == True:
                 move_file_add_to_config(listFiles[indSmallestImage], flag + "_SBRef", False)
 
             # If not, forget about it and generate and SBRef
@@ -432,9 +432,9 @@ def manage_DWI(listFiles):
                 move_file(fileName, "unclassified/" + fileName)
 
 
-def manage_SWI(listFiles):
+def manage_SWI(listFiles, Vendor):
     #Should go through these checks iff the data being read in is Siemens data
-    if os.environ["Siemens_status"] == '1':
+    if Vendor == "Siemens":
 
         listFiles = robustSort(listFiles)
         numFiles = len(listFiles)
@@ -553,7 +553,7 @@ def manage_SWI_pre_combined(listFiles):
 
 
 
-def bb_file_manager(subject):
+def bb_file_manager(subject, Vendor, Acquired_SBREF):
     global logger
     global idealConfig
     global fileConfig
@@ -563,7 +563,7 @@ def bb_file_manager(subject):
     with open(idealConfigFile, 'r') as f:
         idealConfig = json.load(f)
 
-    if os.environ["Siemens_status"] == '1':
+    if Vendor == 'Siemens':
 
         directories = ["delete", "unclassified", "raw", "T1", "T2_FLAIR", "SWI",
                    "SWI/PHA_TE1", "SWI/PHA_TE2", "SWI/MAG_TE1", "SWI/MAG_TE2",
@@ -573,9 +573,9 @@ def bb_file_manager(subject):
                             [["dicom", "DICOM"], move_to, "delete/"],
                             [["T1*.nii.gz"], manage_struct, "T1"],
                             [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
-                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI"],
-                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI"],
-                            [["SWI*nii.gz"], manage_SWI],
+                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI", Acquired_SBREF],
+                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI", Acquired_SBREF],
+                            [["SWI*nii.gz"], manage_SWI, Vendor],
                             [["DIFF_*", "MB3_*"], manage_DWI],
                             [["SWI*.*"], move_to, "SWI/unclassified/"],
                             [["*.*"], move_to, "unclassified/"]
@@ -590,9 +590,9 @@ def bb_file_manager(subject):
                             [["dicom", "DICOM"], move_to, "delete/"],
                             [["T1*.nii.gz"], manage_struct, "T1"],
                             [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
-                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI"],
-                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI"],
-                            [["FILT*SWI*.nii.gz","SWI*nii.gz"], manage_SWI_pre_combined],
+                            [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI", Acquired_SBREF],
+                            [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI", Acquired_SBREF],
+                            [["FILT*SWI*.nii.gz","SWI*nii.gz"], manage_SWI_pre_combined, Vendor],
                             [["DIFF_*", "MB3_*"], manage_DWI],
                             [["SWI*.*"], move_to, "SWI/unclassified/"],
                             [["*.*"], move_to, "unclassified/"]
