@@ -47,7 +47,7 @@ done
 vals=()
 if [ -f $baseSWI/T2star_to_T1.nii.gz ] ; then
  if [ -f $baseT1/T1_first/T1_first_all_fast_firstseg.nii.gz ] ; then
-  for int_val in 10 11 12 13 16 17 18 26 49 50 51 52 53 54 58; do
+  for int_val in 10 49 11 50 12 51 13 52 17 53 18 54 26 58; do
    fslmaths $baseT1/T1_first/T1_first_all_fast_firstseg -thr $int_val -uthr $int_val  -bin  temp;
    val_ind=`fslstats -K temp  $baseSWI/T2star_to_T1 -p 50`;
    vals+=( "$val_ind" )
