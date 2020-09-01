@@ -26,7 +26,7 @@ import numpy as np
 import bb_pipeline_tools.bb_logging_tool as LT
 import time
 
-def bb_pipeline_struct(subject, runTopup, fileConfiguration):
+def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine):
 
     logger  = LT.initLogging(__file__, subject)
     logDir  = logger.logDir
@@ -58,11 +58,11 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration):
             jobMERGE = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5 -N "bb_fslmerge_' + subject + '" -j ' + ",".join(jobsB0) +' -l ' + logDir + ' ${FSLDIR}/bin/fslmerge -t ' + subject + '/fieldmap/B0_AP_PA ' + subject + '/fieldmap/B0_AP ' + subject + '/fieldmap/B0_PA')
 
         # Registrations - T1 to MNI - T2 to T1 - T2 to MNI (Combining the 2 previous ones)
-        jobSTRUCTINIT = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 850 -N "bb_structinit_' + subject + '" -l ' + logDir + '  $BB_BIN_DIR/bb_structural_pipeline/bb_struct_init ' + subject  )
+        jobSTRUCTINIT = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 850 -N "bb_structinit_' + subject + '" -l ' + logDir + '  $BB_BIN_DIR/bb_structural_pipeline/bb_struct_init ' + subject + ' ' + GDC_Status + ' ' + Machine )
 
-        if os.environ["SWI_status"] == '1':
+        if SWI_Status == "SWI_on":
         #TODO: Do a better check here. This one looks arbitrary
-            jobSWI = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 90 -N "bb_swi_reg_' + subject + '" -l ' + logDir + ' -j ' + jobSTRUCTINIT + '  $BB_BIN_DIR/bb_structural_pipeline/bb_swi_reg ' + subject  )
+            jobSWI = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 90 -N "bb_swi_reg_' + subject + '" -l ' + logDir + ' -j ' + jobSTRUCTINIT + '  $BB_BIN_DIR/bb_structural_pipeline/bb_swi_reg ' + subject + ' ' + Vendor + ' ' + GDC_Status + ' ' + Individual_SWI_MAG_coils + ' ' + Machine )
 
 
         # Topup
@@ -79,6 +79,6 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration):
         if not runTopup:
             return ",".join([jobSTRUCTINIT, jobSWI])
         else:
-            jobPOSTTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_topup_' + subject + '" -l ' + logDir + ' -j ' + jobTOPUP + ',' + jobSTRUCTINIT + ',' + jobSWI + ' $BB_BIN_DIR/bb_structural_pipeline/bb_post_topup ' + subject )
+            jobPOSTTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_topup_' + subject + '" -l ' + logDir + ' -j ' + jobTOPUP + ',' + jobSTRUCTINIT + ',' + jobSWI + ' $BB_BIN_DIR/bb_structural_pipeline/bb_post_topup ' + subject + ' ' + GDC_Status + ' ', Machine )
 
         return jobPOSTTOPUP
