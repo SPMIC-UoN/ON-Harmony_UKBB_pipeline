@@ -26,8 +26,8 @@
 
 baseDir=$1
 
-if [ $GDC_Status = 1 ] ; then
-  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz
+if [ $2 = "GDC_on" ] ; then
+  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz --model=$3
 else
   ln -s $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
 fi
