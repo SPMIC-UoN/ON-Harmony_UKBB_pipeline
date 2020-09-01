@@ -24,7 +24,7 @@
 . $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
 
 
-if [ "$GDC_Status" = 0 ] ; then
+if [ $2 = "GDC_off" ] ; then
   echo Running with GDC off for bb_struct_init
 else
   echo Running with GDC on for bb_struct_init
@@ -44,8 +44,8 @@ fi
 
 #Calculate and apply the Gradiefnt Distortion Unwarp
 
-if [ $GDC_Status = 1 ] ; then
-  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T1_GDC/ --in=T1_orig.nii.gz --out=T1_orig_ud.nii.gz --owarp=T1_orig_ud_warp.nii.gz
+if [ $2 = "GDC_on" ] ; then
+  $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T1_GDC/ --in=T1_orig.nii.gz --out=T1_orig_ud.nii.gz --owarp=T1_orig_ud_warp.nii.gz --model=$3
 else
   ${FSLDIR}/bin/imcp T1_orig T1_orig_ud
 fi
@@ -75,7 +75,7 @@ ${FSLDIR}/bin/fnirt --in=T1 --ref=$FSLDIR/data/standard/MNI152_T1_1mm --aff=T1_t
   --jout=T1_to_MNI_warp_jac --iout=T1_tmp4.nii.gz --interp=spline
 
 #Combine both transforms (Gradient Distortion Unwarp and T1 to MNI) into one and then apply it.
-if [ $GDC_Status = 1 ] ; then
+if [ $2 = "GDC_on" ] ; then
   ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T1_orig_ud_warp --midmat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
 else
   ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T1_orig_ud_to_T1.mat --warp2=T1_to_MNI_warp --out=T1_orig_to_MNI_warp
@@ -134,8 +134,8 @@ else
     fi
 
     #Gradient Distortion Unwarp
-    if [ $GDC_Status = 1 ] ; then
-      $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz
+    if [ $2 = "GDC_on" ] ; then
+      $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=./T2_FLAIR_GDC/ --in=T2_FLAIR_orig.nii.gz --out=T2_FLAIR_orig_ud.nii.gz --owarp=T2_FLAIR_orig_ud_warp.nii.gz --model=$3
     else
       ${FSLDIR}/bin/imcp T2_FLAIR_orig T2_FLAIR_orig_ud
     fi
@@ -154,7 +154,7 @@ else
     cp ../T1/transforms/T1_to_MNI_linear.mat T2_FLAIR_to_MNI_linear.mat
 
     #Generate the non-linearly warped T2 in MNI (Needed for post-freesurfer processing)
-    if [ $GDC_Status = 1 ] ; then
+    if [ $2 = "GDC_on" ] ; then
       ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --warp1=T2_FLAIR_orig_ud_warp --midmat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
     else
       ${FSLDIR}/bin/convertwarp --ref=$FSLDIR/data/standard/MNI152_T1_1mm --premat=T2_FLAIR_orig_ud_to_T2_FLAIR.mat --warp2=../T1/transforms/T1_to_MNI_warp --out=T2_FLAIR_orig_to_MNI_warp
@@ -227,7 +227,7 @@ cd ..
 
 #Generate noise-related QC metrics
 $BB_BIN_DIR/bb_structural_pipeline/bb_QC_COG ../$1
-$BB_BIN_DIR/bb_structural_pipeline/bb_QC_CNR_eyes ../$1
+$BB_BIN_DIR/bb_structural_pipeline/bb_QC_CNR_eyes ../$1 $3
 $BB_BIN_DIR/bb_structural_pipeline/bb_QC_CNR_corners_complete ../$1
 
 
