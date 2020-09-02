@@ -169,9 +169,9 @@ def main():
                 jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine)
 
 
-    jobSTEP4 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig))
+        jobSTEP4 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig))
 
-    LT.finishLogging(logger)
+        LT.finishLogging(logger)
 
 if __name__ == "__main__":
     main()
