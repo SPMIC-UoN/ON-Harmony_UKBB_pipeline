@@ -43,32 +43,14 @@ if [ -d $SUBDIR/dMRI/dMRI ] ; then
 
     #Populating the pre cudimot directory with the necessary files required for it to run
     cp $SUBDIR/dMRI/dMRI/data_ud.nii.gz $SUBDIR/dMRI/bb_NODDI_cuDIMOT/data.nii.gz
-    cp -r $SUBDIR/dMRI/dMRI.bedpostX/* $SUBDIR/dMRI/bb_NODDI_cuDIMOT
+    cp $SUBDIR/dMRI/dMRI/nodif_brain_mask.nii.gz $SUBDIR/dMRI/bb_NODDI_cuDIMOT/nodif_brain_mask.nii.gz
+    #cp -r $SUBDIR/dMRI/dMRI.bedpostX/* $SUBDIR/dMRI/bb_NODDI_cuDIMOT
 
     # Line which runs cuDIMOT
     $BB_BIN_DIR/bb_diffusion_pipeline/bb_NODDI_cuDIMOT/Pipeline_NODDI_Watson.sh $SUBDIR/dMRI/bb_NODDI_cuDIMOT
 
-    mv $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/OD.nii.gz $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/NODDI_OD.nii.gz
-    mv $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/mean_fintra.nii.gz $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/NODDI_ICVF.nii.gz
-    mv $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/mean_fiso.nii.gz $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/NODDI_ISOVF.nii.gz
-
-    #Clean directory
-
-    mv $SUBDIR/dMRI/bb_NODDI_cuDIMOT $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson
-    mv $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/bb_NODDI_cuDIMOT $SUBDIR/dMRI/bb_NODDI_cuDIMOT.NODDI_Watson/bb_pre_CUDIMOT
-
-    cd $SUBDIR/dMRI/TBSS/stats
-
-    dtifitDir=../../bb_NODDI_cuDIMOT.NODDI_Watson
-
-    suffix="ICVF OD ISOVF"
-
-    for elem in $suffix ; do
-        $FSLDIR/bin/applywarp --rel -i $dtifitDir/NODDI_$elem -o all_${elem} -r $FSLDIR/data/standard/FMRIB58_FA_1mm -w ../FA/dti_FA_to_MNI_warp
-        $FSLDIR/bin/fslmaths all_${elem} -mas mean_FA_skeleton_mask all_${elem}_skeletonised
-        $FSLDIR/bin/fslstats -K ${FSLDIR}/data/atlases/JHU/JHU-ICBM-labels-1mm all_${elem}_skeletonised.nii.gz -M >JHUrois_${elem}.txt
-    done
-
+    job_bb_NODDI=`${FSLDIR}/bin/fsl_sub -T 60  -N "bb_bb_NODDI_"{$1}   -l  $logDir $BB_BIN_DIR/bb_diffusion_pipeline/bb_NODDI_cuDIMOT/Pipeline_NODDI_Watson.sh $SUBDIR/dMRI/bb_NODDI_cuDIMOT`
+    job_post_NODDI=`${FSLDIR}/bin/fsl_sub -T 15 -N "bb_post_NODDI_cuDIMOT_"{$1} -j $job_bb_NODDI -l $logDir $BB_BIN_DIR/bb_diffusion_pipeline/bb_NODDI_cuDIMOT/bb_post_NODDI`
 fi;
 
 cd $ANALROOT
