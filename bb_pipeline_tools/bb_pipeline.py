@@ -53,6 +53,7 @@ def main():
     parser.add_argument('-S', '--Structural', action='store_true', help="Runs pipeline with strucutural processing")
     parser.add_argument('-F', '--Functional', action='store_true', help="Runs pipeline with functional processing")
     parser.add_argument('-D', '--Diffusion', action='store_true', help="Runs pipeline with diffusion processing")
+    parser.add_argument('-IDP', '--IDP', action='store_true', help="Only runs IDP generating part of the pipeline")
     parser.add_argument('-SBREF', '--Acquired_SBREF', action='store_true', help="uses acquired SBREF rather than pipeline generated version")
     #default value for fmri denosing
     fmri_denoising = "Fix"
@@ -119,6 +120,12 @@ def main():
     if argsa.Structural != True and argsa.Functional != True and argsa.Diffusion != True:
         print("Processing of all modalities to run")
 
+    if argsa.IDP == True and argsa.Structural != True and argsa.Functional != True and argsa.Diffusion != True:
+        Structural_status = "-1"
+        Functional_status = "-1"
+        Diffusion_status = "-1"
+        print("Only running IDP generating part of the pipeline")
+
 
     if argsa.Acquired_SBREF:
         Acquired_SBREF = True
@@ -169,9 +176,9 @@ def main():
                 jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine)
 
 
-        jobSTEP4 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig))
+    jobSTEP4 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig))
 
-        LT.finishLogging(logger)
+    LT.finishLogging(logger)
 
 if __name__ == "__main__":
     main()
