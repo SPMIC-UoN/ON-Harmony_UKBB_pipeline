@@ -60,7 +60,7 @@ ${FSLDIR}/bin/convert_xfm -omat T1_to_SWI.mat -inverse SWI_to_T1.mat
 
 #TODO: BINARISE BRAIN MASK?
 ${FSLDIR}/bin/flirt -in $T1dir/T1_brain_mask -ref SWI_TOTAL_MAG -applyxfm -init T1_to_SWI.mat -out brain_mask -interp trilinear
-if [ $3 = "GDC_on" ] ; then
+if [ $3 = "GDC_off" ] ; then
  ${FSLDIR}/bin/applywarp --rel -i T2star -r $T1dir/T1 -o T2star_to_T1  --postmat=SWI_to_T1.mat --interp=trilinear
 else
  ${FSLDIR}/bin/applywarp --rel -i T2star -r $T1dir/T1 -o T2star_to_T1 -w SWI_TOTAL_MAG_orig_ud_warp --postmat=SWI_to_T1.mat --interp=trilinear
