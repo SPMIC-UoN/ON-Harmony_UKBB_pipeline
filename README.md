@@ -25,7 +25,33 @@ This will activate the UKBB Conda environment. We can then run the pipeline. Onc
 
 GDC (gradient non linearity corrections) should be turned on for SIEMNS scanners. (The scanner coeff files should be copied into bb_data). For non Siemens scanners we have trusted the GDC performed by the scanner and can turn this off.
 
-*bb_pipeline.py subjectFolder*
+*bb_pipeline.py subjectFolder Scanner -Modality  * 
+
+usage: bb_pipeline.py [-h] [-S] [-F] [-D] [-IDP] [-SBREF]
+                      [-fd {Off,Fix,Aroma}]
+                      subjectFolder
+                      {Siemens_P1,Siemens_P2,Siemens_T,Phillips,GE}
+
+BioBank Pipeline Manager, Runs all modalities by default with pipeline
+generated SBREF and Fix fmri denoising
+
+positional arguments:
+  subjectFolder         Subject Folder
+  {Siemens_P1,Siemens_P2,Siemens_T,Phillips,GE}
+                        The machine on which the data was acquired
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -S, --Structural      Runs pipeline with strucutural processing
+  -F, --Functional      Runs pipeline with functional processing
+  -D, --Diffusion       Runs pipeline with diffusion processing
+  -IDP, --IDP           Only runs IDP generating part of the pipeline
+  -SBREF, --Acquired_SBREF
+                        uses acquired SBREF rather than pipeline generated
+                        version
+  -fd {Off,Fix,Aroma}, --fmri_denoising {Off,Fix,Aroma}
+                        method of fmri denoising
+
 
 where subjectFolder contains the input NIFTI files for a given subject.
 
