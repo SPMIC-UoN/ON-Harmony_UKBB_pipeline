@@ -85,7 +85,7 @@ if [ $model = 'Siemens_P1' ] ; then
   InputCoefficients="$BB_BIN_DIR/bb_data/FMRIB_Prisma_coeff.grad"
 elif [ $model = 'Siemens_P2' ] ; then
   InputCoefficients="$BB_BIN_DIR/bb_data/OHBA_Prisma_coeff.grad"
-elif [ $model = 'Siemens_T' ; then ]
+elif [ $model = 'Siemens_T' ] ; then
   InputCoefficients="$BB_BIN_DIR/bb_data/OCMR_Trio_coeff.grad"
 fi
 
