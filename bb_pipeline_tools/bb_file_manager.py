@@ -592,7 +592,7 @@ def bb_file_manager(subject, Vendor, Acquired_SBREF):
                             [["T2*FLAIR*.nii.gz"], manage_struct, "T2"],
                             [["*FMRI*RESTING*.nii.gz", "MB8*RESTING*.nii.gz"], manage_fMRI, "rfMRI", Acquired_SBREF],
                             [["*FMRI*TASK*.nii.gz", "MB8*TASK*.nii.gz"], manage_fMRI, "tfMRI", Acquired_SBREF],
-                            [["FILT*SWI*.nii.gz","SWI*nii.gz"], manage_SWI_pre_combined, Vendor],
+                            [["FILT*SWI*.nii.gz","SWI*nii.gz"], manage_SWI_pre_combined],
                             [["DIFF_*", "MB3_*"], manage_DWI],
                             [["SWI*.*"], move_to, "SWI/unclassified/"],
                             [["*.*"], move_to, "unclassified/"]
