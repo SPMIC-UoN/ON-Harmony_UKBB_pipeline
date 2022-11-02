@@ -20,7 +20,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [ $3 = "GDC_off" ] ; then
+if [ $2 = "GDC_off" ] ; then
   echo Running with GDC off for bb_post_topup
 else
   echo Running with GDC on for bb_post_topup
@@ -51,7 +51,7 @@ ${FSLDIR}/bin/fslmaths $1/fieldmap/fieldmap_iout.nii.gz -Tmean $1/fieldmap/field
 
 
 #GDC to iout_mean
-if [ $3 = GDC_on ] ; then
+if [ $2 = GDC_on ] ; then
   $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$1/fieldmap//fieldmap_iout_GDC/ --in=$1/fieldmap/fieldmap_iout_mean.nii.gz --out=$1/fieldmap/fieldmap_iout_mean_ud.nii.gz --owarp=$1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz --model=$3
 else
   ${FSLDIR}/bin/imcp $1/fieldmap/fieldmap_iout_mean.nii.gz $1/fieldmap/fieldmap_iout_mean_ud.nii.gz
@@ -67,7 +67,7 @@ ${FSLDIR}/bin/imrm $1/fieldmap/*_tmp.nii.gz
 # Get the topup iout (magnitude) to struct space and apply the transformation to fout (fieldmap)
 $BB_BIN_DIR/bb_structural_pipeline/bb_epi_reg --epi=$1/fieldmap/fieldmap_iout_mean_ud.nii.gz --t1=$1/T1/T1.nii.gz --t1brain=$1/T1/T1_brain.nii.gz --out=$1/fieldmap/fieldmap_iout_to_T1 --wmseg=$1/T1/T1_fast/T1_brain_WM_mask.nii.gz
 
-if [ $3 = GDC_on ] ; then
+if [ $2 = GDC_on ] ; then
   ${FSLDIR}/bin/applywarp --rel -i $1/fieldmap/fieldmap_fout.nii.gz -r $1/T1/T1.nii.gz -o $1/fieldmap/fieldmap_fout_to_T1 -w $1/fieldmap/fieldmap_iout_mean_ud_warp.nii.gz  --postmat=$1/fieldmap/fieldmap_iout_to_T1.mat --interp=spline
 else
   ${FSLDIR}/bin/applywarp --rel -i $1/fieldmap/fieldmap_fout.nii.gz -r $1/T1/T1.nii.gz -o $1/fieldmap/fieldmap_fout_to_T1 --postmat=$1/fieldmap/fieldmap_iout_to_T1.mat --interp=spline
