@@ -26,7 +26,7 @@ import numpy as np
 import bb_pipeline_tools.bb_logging_tool as LT
 import time
 
-def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine):
+def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status):
 
     logger  = LT.initLogging(__file__, subject)
     logDir  = logger.logDir
@@ -79,6 +79,6 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status,
         if not runTopup:
             return ",".join([jobSTRUCTINIT, jobSWI])
         else:
-            jobPOSTTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_topup_' + subject + '" -l ' + logDir + ' -j ' + jobTOPUP + ',' + jobSTRUCTINIT + ',' + jobSWI + ' $BB_BIN_DIR/bb_structural_pipeline/bb_post_topup ' + subject + ' ' + GDC_Status + ' ', Machine )
+            jobPOSTTOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_topup_' + subject + '" -l ' + logDir + ' -j ' + jobTOPUP + ',' + jobSTRUCTINIT + ',' + jobSWI + ' $BB_BIN_DIR/bb_structural_pipeline/bb_post_topup ' + subject + ' ' + GDC_Status + ' ' + Machine)
 
         return jobPOSTTOPUP
