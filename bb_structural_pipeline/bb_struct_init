@@ -96,6 +96,7 @@ ${FSLDIR}/bin/convert_xfm -omat grot.mat -inverse grot.mat
 ${FSLDIR}/bin/flirt -in $templ/MNI152_T1_1mm_BigFoV_facemask -ref T1_orig -out grot -applyxfm -init grot.mat
 #${FSLDIR}/bin/fslmaths grot -mul -1 -add 1 -mul T1_orig T1_orig_defaced
 ${FSLDIR}/bin/fslmaths grot -binv -mul T1_orig T1_orig_defaced
+cp grot.nii.gz defacemask.nii.gz
 
 cp T1.nii.gz T1_not_defaced_tmp.nii.gz
 ${FSLDIR}/bin/convert_xfm -omat grot.mat -concat $templ/MNI_to_MNI_BigFoV_facemask.mat T1_to_MNI_linear.mat
