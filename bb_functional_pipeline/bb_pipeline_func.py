@@ -25,7 +25,7 @@
 import bb_pipeline_tools.bb_logging_tool as LT
 import os.path
 
-def bb_pipeline_func(subject, jobHold, fileConfiguration, GDC_Status, fmri_denoising, Machine):
+def bb_pipeline_func(subject, jobHold, fileConfiguration, GDC_Status, fmri_denoising, Machine, Acquired_SBREF_status):
 
     logger  = LT.initLogging(__file__, subject)
     logDir  = logger.logDir
@@ -38,11 +38,26 @@ def bb_pipeline_func(subject, jobHold, fileConfiguration, GDC_Status, fmri_denoi
     #TODO: Embed the checking of the fieldmap inside the independent steps -- Every step should check if the previous one has ended.
     if ('rfMRI' in fileConfiguration) and (fileConfiguration['rfMRI'] != ''):
 
-        jobPREPARE_R = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 15   -N "bb_prepare_rfMRI_' + subject + '"  -l ' + logDir + ' -j ' + jobPOSTPROCESS + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_rfMRI ' + subject + ' ' + GDC_Status + ' ' + Machine)
-        jobFEAT_R =    LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 1200 -N "bb_feat_rfMRI_ns_' + subject + '"  -l ' + logDir + ' -j ' + jobPREPARE_R   + ' feat  ' + baseDir + '/fMRI/rfMRI.fsf')
-        jobFIX =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 175  -N "bb_fix_'           + subject + '"  -l ' + logDir + ' -j ' + jobFEAT_R      + ' $BB_BIN_DIR/bb_functional_pipeline/bb_fix ' + subject + ' ' + fmri_denoising )
-        jobDR  =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 120  -N "bb_ICA_dr_'        + subject + '"  -l ' + logDir + ' -j ' + jobFIX         + ' $BB_BIN_DIR/bb_functional_pipeline/bb_ICA_dual_regression ' + subject )
-        jobCLEAN =     LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5    -N "bb_rfMRI_clean_'   + subject + '"  -l ' + logDir + ' -j ' + jobDR          + ' $BB_BIN_DIR/bb_functional_pipeline/bb_clean_fix_logs ' + subject )
+        if Acquired_SBREF_status == "True":
+            print("starting fmri fieldmap")
+            jobPREPARE_fMRI_FIELDMAP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5 -N "bb_prepare_fmri_fieldmap_' + subject + '" -l ' + logDir + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_fmri_fieldmap ' + subject )
+            print("finished fmri fieldmap")
+            jobfMRI_TOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 90 -N "bb_fMRI_topup_' + subject + '" -l ' + logDir + ' -j ' + jobPREPARE_fMRI_FIELDMAP + ' ${FSLDIR}/bin/topup --imain=' + subject + '/fmri_fieldmap/SE_B0_AP_PA --datain=' + subject + '/fmri_fieldmap/acqparams.txt --config=b02b0.cnf --out=' + subject + '/fmri_fieldmap/fieldmap_out --fout=' + subject + '/fmri_fieldmap/fieldmap_fout --jacout=' + subject + '/fmri_fieldmap/fieldmap_jacout -v')
+            print("starting post fmri topup")
+            jobPOST_fMRI_TOPUP = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 60 -N "bb_post_fMRI_topup_' + subject + '" -l ' +  logDir + ' -j ' + jobfMRI_TOPUP + ' $BB_BIN_DIR/bb_functional_pipeline/bb_post_fmri_topup ' + subject + ' ' + GDC_Status + ' ' + Machine )
+            print("finishing post fmri topup")
+            jobPREPARE_R = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 15   -N "bb_prepare_rfMRI_' + subject + '"  -l ' + logDir + ' -j ' + jobPOSTPROCESS + jobPOST_fMRI_TOPUP + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_rfMRI ' + subject + ' ' + GDC_Status + ' ' + Machine + ' ' + Acquired_SBREF_status + ' ' + fmri_denoising)
+            jobFEAT_R =    LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 1200 -N "bb_feat_rfMRI_ns_' + subject + '"  -l ' + logDir + ' -j ' + jobPREPARE_R   + ' feat  ' + baseDir + '/fMRI/rfMRI.fsf')
+            jobFIX =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 175  -N "bb_fix_'           + subject + '"  -l ' + logDir + ' -j ' + jobFEAT_R      + ' $BB_BIN_DIR/bb_functional_pipeline/bb_fix ' + subject + ' ' + fmri_denoising )
+            jobDR  =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 120  -N "bb_ICA_dr_'        + subject + '"  -l ' + logDir + ' -j ' + jobFIX         + ' $BB_BIN_DIR/bb_functional_pipeline/bb_ICA_dual_regression ' + subject )
+            jobCLEAN =     LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5    -N "bb_rfMRI_clean_'   + subject + '"  -l ' + logDir + ' -j ' + jobDR          + ' $BB_BIN_DIR/bb_functional_pipeline/bb_clean_fix_logs ' + subject )
+
+        else:
+            jobPREPARE_R = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 15   -N "bb_prepare_rfMRI_' + subject + '"  -l ' + logDir + ' -j ' + jobPOSTPROCESS + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_rfMRI ' + subject + ' ' + GDC_Status + ' ' + Machine + ' ' + Acquired_SBREF_status + ' ' + fmri_denoising)
+            jobFEAT_R =    LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 1200 -N "bb_feat_rfMRI_ns_' + subject + '"  -l ' + logDir + ' -j ' + jobPREPARE_R   + ' feat  ' + baseDir + '/fMRI/rfMRI.fsf')
+            jobFIX =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 175  -N "bb_fix_'           + subject + '"  -l ' + logDir + ' -j ' + jobFEAT_R      + ' $BB_BIN_DIR/bb_functional_pipeline/bb_fix ' + subject + ' ' + fmri_denoising )
+            jobDR  =       LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 120  -N "bb_ICA_dr_'        + subject + '"  -l ' + logDir + ' -j ' + jobFIX         + ' $BB_BIN_DIR/bb_functional_pipeline/bb_ICA_dual_regression ' + subject )
+            jobCLEAN =     LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5    -N "bb_rfMRI_clean_'   + subject + '"  -l ' + logDir + ' -j ' + jobDR          + ' $BB_BIN_DIR/bb_functional_pipeline/bb_clean_fix_logs ' + subject )
 
         jobsToWaitFor  = jobCLEAN
 
@@ -50,7 +65,7 @@ def bb_pipeline_func(subject, jobHold, fileConfiguration, GDC_Status, fmri_denoi
         logger.error("There is no rFMRI info. Thus, the Resting State part will not be run")
 
     if ('tfMRI' in fileConfiguration) and (fileConfiguration['tfMRI'] != ''):
-        jobPREPARE_T = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T  15 -N "bb_prepare_tfMRI_' + subject + '" -l ' + logDir + ' -j ' + jobPOSTPROCESS + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_tfMRI ' + subject + ' ' + GDC_Status + ' ' + Machine)
+        jobPREPARE_T = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T  15 -N "bb_prepare_tfMRI_' + subject + '" -l ' + logDir + ' -j ' + jobPOSTPROCESS + ' $BB_BIN_DIR/bb_functional_pipeline/bb_prepare_tfMRI ' + subject + ' ' + GDC_Status + ' ' + Machine + ' '+ Acquired_SBREF_status + ' ' + fmri_denoising)
         jobFEAT_T =    LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 400 -N "bb_feat_tfMRI_'    + subject + '" -l ' + logDir + ' -j ' + jobPREPARE_T   + ' feat  ' + baseDir + '/fMRI/tfMRI.fsf')
 
         if jobsToWaitFor != "":
