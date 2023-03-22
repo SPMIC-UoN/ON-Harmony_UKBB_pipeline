@@ -26,14 +26,18 @@
 
 baseDir=$1
 
+if [ $4 = "True" ] ; then
+  mrtrix dwidenoise $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data.nii.gz -force
+fi
+
+$FSLDIR/bin/eddy_quad $baseDir/dMRI/dMRI/data -idx $baseDir/dMRI/dMRI/eddy_index.txt -par $baseDir/dMRI/dMRI/data.eddy_parameters -m $baseDir/dMRI/dMRI/nodif_brain_mask.nii.gz -b $baseDir/dMRI/dMRI/bvals
+
 if [ $2 = "GDC_on" ] ; then
   $BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz --model=$3
 else
   ln -s $baseDir/dMRI/dMRI/data.nii.gz $baseDir/dMRI/dMRI/data_ud.nii.gz
 fi
 #$BB_BIN_DIR/bb_pipeline_tools/bb_GDC --workingdir=$baseDir/dMRI/dMRI/data_GDC --in=$baseDir/dMRI/dMRI/data.nii.gz --out=$baseDir/dMRI/dMRI/data_ud.nii.gz --owarp=$baseDir/dMRI/dMRI/data_ud_warp.nii.gz
-
-
 
 #Correct input for dtifit
 $BB_BIN_DIR/bb_diffusion_pipeline/bb_select_dwi_vols $baseDir/dMRI/dMRI/data_ud.nii.gz $baseDir/dMRI/dMRI/bvals $baseDir/dMRI/dMRI/data_ud_1_shell 1000 1 $baseDir/dMRI/dMRI/bvecs

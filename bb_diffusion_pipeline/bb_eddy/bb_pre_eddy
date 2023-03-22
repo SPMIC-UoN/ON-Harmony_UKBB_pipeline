@@ -21,7 +21,7 @@
 # limitations under the License.
 #
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header
 
 direc=$PWD/$1
 mkdir -p $direc/dMRI/dMRI/
@@ -46,5 +46,4 @@ done
 
 echo $indx > $direc/dMRI/dMRI/eddy_index.txt
 
-. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
-
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
