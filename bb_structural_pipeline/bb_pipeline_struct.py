@@ -26,7 +26,7 @@ import numpy as np
 import bb_pipeline_tools.bb_logging_tool as LT
 import time
 
-def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status):
+def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status, dmri_denoise):
 
     logger  = LT.initLogging(__file__, subject)
     logDir  = logger.logDir
@@ -41,18 +41,24 @@ def bb_pipeline_struct(subject, runTopup, fileConfiguration, Vendor, GDC_Status,
     else:
         #TODO: Adapt code to good syntax practices --> PEP 8
 
+        jobsDD=[]
+        if dmri_denoise:
+            jobsDD.append(LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "denoise_'       + subject + '" -l ' + logDir + ' mrtrix dwidenoise ' + baseDir + '/dMRI/raw/AP.nii.gz ' + baseDir + '/dMRI/raw/AP.nii.gz -force' ))
+            jobsDD.append(LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "denoise_'       + subject + '" -l ' + logDir + ' mrtrix dwidenoise ' + baseDir + '/dMRI/raw/PA.nii.gz ' + baseDir + '/dMRI/raw/PA.nii.gz -force '))
+
         # Create the B0 AP - PA file to estimate the fieldmaps
         b0_threshold=int(np.loadtxt(os.environ['BB_BIN_DIR'] + "/bb_data/b0_threshold.txt"))
-
         jobsB0=[]
-
         if runTopup:
             for encDir in ['AP', 'PA']:
                 bvals=np.loadtxt(subject +"/dMRI/raw/" + encDir + ".bval")
                 numVols=int(sum(bvals<=b0_threshold))
 
                 #numVols= LT.runCommand(logger, "for f in `cat " + subject +"/dMRI/raw/" + encDir + ".bval` ; do echo $f; done | awk '{if($1==$1+0 && $1 < " + b0_threshold + " ) print $1}' |wc | awk '{print $1}'")
-                jobGETB01 = LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "bb_get_b0s_1_'       + subject + '" -l ' + logDir + ' $BB_BIN_DIR/bb_structural_pipeline/bb_get_b0s.py -i ' + subject + '/dMRI/raw/' + encDir + '.nii.gz -o ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz -n ' + str(numVols) + ' -l ' + str(b0_threshold) )
+                if dmri_denoise:
+                    jobGETB01 = LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "bb_get_b0s_1_'       + subject + '" -l ' + logDir + ' -j ' + ",".join(jobsDD) + ' $BB_BIN_DIR/bb_structural_pipeline/bb_get_b0s.py -i ' + subject + '/dMRI/raw/' + encDir + '.nii.gz -o ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz -n ' + str(numVols) + ' -l ' + str(b0_threshold) )
+                else:
+                    jobGETB01 = LT.runCommand(logger,   '${FSLDIR}/bin/fsl_sub -T 5  -N "bb_get_b0s_1_'       + subject + '" -l ' + logDir + ' $BB_BIN_DIR/bb_structural_pipeline/bb_get_b0s.py -i ' + subject + '/dMRI/raw/' + encDir + '.nii.gz -o ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz -n ' + str(numVols) + ' -l ' + str(b0_threshold) )
                 jobsB0.append(LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 20 -N "bb_choose_bestB0_1_' + subject + '" -l ' + logDir + ' -j ' + jobGETB01  + ' $BB_BIN_DIR/bb_structural_pipeline/bb_choose_bestB0 ' + subject + '/fieldmap/total_B0_' + encDir + '.nii.gz ' + subject + '/fieldmap/B0_' + encDir + '.nii.gz '))
 
             jobMERGE = LT.runCommand(logger, '${FSLDIR}/bin/fsl_sub -T 5 -N "bb_fslmerge_' + subject + '" -j ' + ",".join(jobsB0) +' -l ' + logDir + ' ${FSLDIR}/bin/fslmerge -t ' + subject + '/fieldmap/B0_AP_PA ' + subject + '/fieldmap/B0_AP ' + subject + '/fieldmap/B0_PA')

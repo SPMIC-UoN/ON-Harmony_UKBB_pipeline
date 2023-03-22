@@ -34,7 +34,6 @@ from bb_structural_pipeline.bb_pipeline_struct import bb_pipeline_struct
 from bb_functional_pipeline.bb_pipeline_func import bb_pipeline_func
 from bb_diffusion_pipeline.bb_pipeline_diff import bb_pipeline_diff
 from bb_IDP.bb_IDP import bb_IDP
-from bb_mist_processing.bb_mist_processing import bb_mist_processing
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
@@ -54,15 +53,18 @@ def main():
     parser.add_argument('-S', '--Structural', action='store_true', help="Runs pipeline with strucutural processing")
     parser.add_argument('-F', '--Functional', action='store_true', help="Runs pipeline with functional processing")
     parser.add_argument('-D', '--Diffusion', action='store_true', help="Runs pipeline with diffusion processing")
-    parser.add_argument('-MIST', '--MIST', action='store_true', help="Only runs MIST processing part of the pipeline")
     parser.add_argument('-IDP', '--IDP', action='store_true', help="Only runs IDP generating part of the pipeline")
     parser.add_argument('-SBREF', '--Acquired_SBREF', action='store_true', help="uses acquired SBREF rather than pipeline generated version")
     #default value for fmri denosing
     fmri_denoising = "Fix"
     parser.add_argument('-fd', '--fmri_denoising', help='method of fmri denoising',choices=['Off', 'Fix', 'Aroma'])
-    #default value for MIST
-    dMRI_Mist = "Off"
-    parser.add_argument('-dMIST', '--dMRI_mist', action='store_true', help="if adding dMRI to mist processing")
+
+    #default value for dmri denosing
+    dmri_denoising = "Off"
+    parser.add_argument('-dd', '--dmri_denoising', help='method of dmri denoising (pre- before any processing, post- after eddy)',choices=['Off', 'pre', 'post'])
+    # which version of eddy to use? Original UKBB call is default
+    parser.add_argument('-ev', '--eddy_version', action='store_true', help="Which eddy call should be used. Default = UKBB. -ev = modified eddy call removing SLM")
+
 
     argsa = parser.parse_args()
 
@@ -81,6 +83,9 @@ def main():
     if argsa.fmri_denoising:
         fmri_denoising = argsa.fmri_denoising
 
+    if argsa.dmri_denoising:
+        dmri_denoising = argsa.dmri_denoising
+
     if Vendor != 'Siemens':
         GDC_Status = "GDC_off"
         Individual_SWI_MAG_coils = "Comb_coils"
@@ -95,7 +100,6 @@ def main():
     SWI_Status = "SWI_on"
     Functional_status = "1"
     Diffusion_status = "1"
-    MIST_status = "1"
 
     if argsa.Structural == True and argsa.Functional != True and argsa.Diffusion != True:
         Functional_status = "-1"
@@ -113,36 +117,25 @@ def main():
     if argsa.Structural != True and argsa.Functional == True and argsa.Diffusion != True:
         Structural_status = "-1"
         Diffusion_status = "-1"
-        MIST_status = "-1"
         print("Only functional processing to run")
 
     if argsa.Structural != True and argsa.Functional == True and argsa.Diffusion == True:
         Structural_status = "-1"
-        MIST_status = "-1"
         print("Only functional and diffusion processing to run")
 
     if argsa.Structural != True and argsa.Functional != True and argsa.Diffusion == True:
         Structural_status = "-1"
         Functional_status = "-1"
-        MIST_status = "-1"
         print("Only diffusion processing to run")
 
     if argsa.Structural != True and argsa.Functional != True and argsa.Diffusion != True:
         print("Processing of all modalities to run")
 
-    if argsa.MIST == True and argsa.Structural != True and argsa.Functional != True and argsa.Diffusion != True:
-        Structural_status = "-1"
-        Functional_status = "-1"
-        Diffusion_status = "-1"
-        print("Only MIST processing part of the pipeline to run")
-
     if argsa.IDP == True and argsa.Structural != True and argsa.Functional != True and argsa.Diffusion != True:
         Structural_status = "-1"
         Functional_status = "-1"
         Diffusion_status = "-1"
-        MIST_status = "-1"
         print("Only running IDP generating part of the pipeline")
-
 
     if argsa.Acquired_SBREF:
         Acquired_SBREF_status = True
@@ -152,15 +145,11 @@ def main():
         print("Using Pipeline generated SBREF")
 
     print("Method of fmri denosing: " + fmri_denoising)
+    print("Method of dmri denosing: " + dmri_denoising)
 
-
-    if argsa.dMRI_mist:
-        dMRI_MIST_Status = True
-        print("Using dMRI data as part of MIST")
-    else:
-        dMRI_MIST_Status = False
-        print("Not using dMRI data as part of MIST")
-
+    eddy_version = argsa.eddy_version
+    if eddy_version == True:
+        print("Running diffusion pipeline using the modified eddy call")
 
     if subject[-1] =='/':
         subject = subject[0:len(subject)-1]
@@ -180,6 +169,16 @@ def main():
     else:
         runTopup = True
 
+    if dmri_denoising == 'pre':
+        dmri_denoising_pre = True
+        dmri_denoising_post = False
+    elif dmri_denoising == 'post':
+        dmri_denoising_pre = False
+        dmri_denoising_post = True
+    else:
+        dmri_denoising_pre = False
+        dmri_denoising_post = False
+
     # Default value for job id. SGE does not wait for a job with this id.
     jobSTEP1 = "-1"
     jobSTEP2 = "-1"
@@ -187,7 +186,7 @@ def main():
     jobSTEP4 = "-1"
 
     if Structural_status == '1':
-        jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig, Vendor , GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status )
+        jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig, Vendor , GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status, dmri_denoising_pre)
 
     # Will only wait for top up if structural pipeline has been scheduled to run
     if Structural_status == '1':
@@ -195,16 +194,14 @@ def main():
             if Functional_status == '1':
                 jobSTEP2 = bb_pipeline_func(subject, str(jobSTEP1), fileConfig, GDC_Status, fmri_denoising, Machine, str(Acquired_SBREF_status))
             if Diffusion_status == '1':
-                jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine)
+                jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine, dmri_denoising_post, eddy_version)
     else:
             if Functional_status == '1':
                 jobSTEP2 = bb_pipeline_func(subject, str(jobSTEP1), fileConfig, GDC_Status, fmri_denoising, Machine, str(Acquired_SBREF_status))
             if Diffusion_status == '1':
-                jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine)
-    if MIST_status == '1':
-    	jobSTEP4 = bb_mist_processing(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig), str(dMRI_MIST_Status) )
+                jobSTEP3 = bb_pipeline_diff(subject, str(jobSTEP1), fileConfig, GDC_Status, Machine, dmri_denoising_post, eddy_version)
 
-    jobSTEP5 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3 + "," + str(jobSTEP4), str(fileConfig))
+    jobSTEP5 = bb_IDP(subject, str(jobSTEP1) + "," + jobSTEP2 + "," + jobSTEP3, str(fileConfig))
 
     LT.finishLogging(logger)
 
