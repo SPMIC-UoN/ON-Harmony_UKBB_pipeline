@@ -36,18 +36,33 @@ numlines=`${FSLDIR}/bin/fslval $1/dMRI/raw/AP.nii.gz dim2`
 dtiDwell=`$BB_BIN_DIR/bb_pipeline_tools/bb_get_dwell_time $1/dMRI/raw/AP.nii.gz`
 topupValue="0"`echo "scale=4;("$dtiDwell" * ("$numlines" -1.0)) / 1000.0 "| bc`
 
-cat /dev/null > $1/fieldmap/acqparams.txt 
+cat /dev/null > $1/fieldmap/acqparams.txt
 
-for i in `seq 1 $numAP`;
-do
-    printf "0 -1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
-done   
 
-for i in `seq 1 $numPA`;
-do
-    printf "0 1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
-done   
+# set PE direction for distortion corrections (deault is y-, use sed to replace)
+PEdir=`grep '"PhaseEncodingDirection"' $1/dMRI/raw/AP.json`
 
+if [[ $PEdir == *j-* ]]; then
+  for i in `seq 1 $numAP`;
+  do
+      printf "0 -1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
+  done
+
+  for i in `seq 1 $numPA`;
+  do
+      printf "0 1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
+  done
+else
+  for i in `seq 1 $numAP`;
+  do
+      printf "0 1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
+  done
+
+  for i in `seq 1 $numPA`;
+  do
+      printf "0 -1 0 $topupValue\n" >>$1/fieldmap/acqparams.txt
+  done
+fi
 
 # Topup expect the number of slices in the Z direction to be multiple of the sub-sampling level (2)
 # Therefore, In case the number of slices in z direction is not even, take out one of them
@@ -59,4 +74,4 @@ if [ ! $rem == 0 ]; then
    ${FSLDIR}/bin/fslroi $1/fieldmap/B0_AP_PA $1/fieldmap/B0_AP_PA 0 -1 0 -1 0 `expr $Zslices - 1`
 fi
 
-#. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+#. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer
