@@ -186,7 +186,7 @@ def main():
     jobSTEP4 = "-1"
 
     if Structural_status == '1':
-        jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig, Vendor , GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status, dmri_denoising_pre)
+        jobSTEP1 = bb_pipeline_struct(subject, runTopup, fileConfig, Vendor, GDC_Status, Individual_SWI_MAG_coils, SWI_Status, Machine, Acquired_SBREF_status, dmri_denoising_pre)
 
     # Will only wait for top up if structural pipeline has been scheduled to run
     if Structural_status == '1':
