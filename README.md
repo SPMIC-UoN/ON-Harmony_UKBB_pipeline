@@ -58,7 +58,7 @@ where subjectFolder contains the input NIFTI files for a given subject.
 
 The folling bmri_group_means.zip should be downloaded from http://biobank.ctsu.ox.ac.uk/showcase/refer.cgi?id=9028 and extracted into the following directory bb_functional_pipeline/bb_fslnets
 
-Finally,  add the following "UKBiobank.RData." for FIX (BIANCA files already done) from https://www.fmrib.ox.ac.uk/ukbiobank/fb into templates/group folder.
+Finally, make sure to add the following three files with pre-trained models (for BIANCA and FIX), following the instructions from https://www.fmrib.ox.ac.uk/ukbiobank/fbp. And copy the two template melodic files from https://www.dropbox.com/s/9fhunsxaetz804n/UKBB_Melodic_IC_templates.zip?dl=0 to the templates/group folder.
 
 Input Requirements
 ------------------
