@@ -1,7 +1,7 @@
 UK_biobank_pipeline
 ===================
 
-The `UK_biobank_pipeline` project is a processing pipeline written mainly in Python and bash. It uses [FSL](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/) as the basic building blocks.
+The `UK_biobank_pipeline` project is a processing pipeline written mainly in Python and bash. It uses [FSL (v6.0.3 recommended)](http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/) as the basic building blocks.
 
 
 Dependencies
