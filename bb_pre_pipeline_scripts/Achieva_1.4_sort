@@ -1,0 +1,48 @@
+#!/bin/sh
+
+AP=$1
+#extract non 0 bvalues and saving output to temp
+select_dwi_vols ${AP}.nii.gz ${AP}.bval ${AP}_temp.nii.gz 1000 -b 2000 -obv ${AP}.bvec;
+echo finisihed extracting and making new file
+
+#extract valid b0 and save to temp0
+fslselectvols -i ${AP}.nii.gz -o ${AP}_temp0.nii.gz --vols=0;
+echo finished selectvols
+
+#recombine volumes and delte old
+rm ${AP}.nii.gz
+echo recombining
+fslmerge -t ${AP}_fixed.nii.gz ${AP}_temp0.nii.gz ${AP}_temp.nii.gz
+echo first merge complete
+rm ${AP}_temp0.nii.gz ${AP}_temp.nii.gz
+echo first temp files removed 
+# now creating temporary bvec and bval files to paste on to actual AP.bvec and AP.bval 
+echo $1
+
+echo "0" >my1b0.bval
+echo "0" >my1b0.bvec
+echo "0" >>my1b0.bvec
+echo "0" >>my1b0.bvec
+
+
+echo "0 0 0" >myb0.bval 
+echo "0 0 0" >myb0.bvec 
+echo "0 0 0" >>myb0.bvec 
+echo "0 0 0" >>myb0.bvec 
+
+# Now append thes values to the end of bvals and bvecs
+echo bvals and bvecs pasted
+paste myb0.bval my1b0.bval ${AP}_temp.nii.gz.bval myb0.bval -d " " > ${AP}_final.bval
+paste myb0.bvec my1b0.bvec ${AP}_temp.nii.gz.bvec myb0.bvec -d " " > ${AP}_final.bvec
+
+rm ${AP}_temp.nii.gz.bval ${AP}_temp.nii.gz.bvec
+
+mv ${AP}_final.bvec ${AP}.bvec 
+mv ${AP}_final.bval ${AP}.bval
+
+rm myb0.bval myb0.bvec my1b0.bvec my1b0.bval
+echo second temp files deleted
+fslmerge -t ${AP}.nii.gz  *b_coil_echo1_801.nii.gz *b_coil_echo1_901.nii.gz *b_coil_echo1_1001.nii.gz ${AP}_fixed.nii.gz *b_coil_echo1_1201.nii.gz *b_coil_echo1_1301.nii.gz *b_coil_echo1_1401.nii.gz
+echo final merge complete
+rm ${AP}_fixed.nii.gz
+echo done

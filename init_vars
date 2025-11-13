@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# Script name: init_vars
+#
+# Description: Script to initalise the variables needed for the pipeline.
+#
+# Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
+#
+# Copyright 2017 University of Oxford
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+###########################################
+#                                         #
+#   USER MUST MODIFY THE INDICATED LINES  #
+#                                         #
+###########################################
+
+#PYTHON VERSION                                #RECOMMENDED
+pyVersion="3.5.1"
+
+
+
+##sourcing set up file for swi
+source /home/ppxan2/UK_biobank_pipeline/bb_structural_pipeline/bb_swi_dir/settings.sh
+
+
+
+#SETUP FSL
+export FSLDIR=/usr/local/fsl-6.0.3                #TO BE MODIFIED BY USER
+. $FSLDIR/etc/fslconf/fsl.sh
+export FSLCONFDIR=${FSLDIR}/config
+export FSLOUTPUTTYPE="NIFTI_GZ"
+export FSLGECUDAQ="cuda.q"                  #TO BE MODIFIED BY USER
+
+#SETUP FREESURFER
+export FREESURFER_HOME=/usr/local/freesurfer #TO BE MODIFIED BY USER
+source $FREESURFER_HOME/SetUpFreeSurfer.sh  > /dev/null
+
+#Move $FSLDIR/bin before $FREESURFER_HOME in the path
+FSLDIRseddable=`echo $FSLDIR | sed 's|/|\\\/|g'`
+PATH=`echo $PATH | sed "s|$FSLDIR/bin||g"`
+export PATH="$FSLDIR/bin:$PATH"
+
+#SETUP EXTERNAL LIBRARIES
+export R_LIBS=/usr/lib64/R/library:/usr/share/R/library                    #TO BE MODIFIED BY USER (run in R .libPaths() to find where the R libs are)
+
+#SET LOCALE FOR FLOATING POINT FORMATTING
+export LC_ALL=C
+
+#SET DYNAMIC LIBRARIES FOR BEDPOSTX
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH              #TO BE MODIFIED BY USER
+
+#ENV VARIABLES
+export BBDIR=/home/ppxan2/Harmonise3T/Processing                           #TO BE MODIFIED BY USER, where subject folders will be
+export BB_BIN_DIR=/home/ppxan2/UK_biobank_pipeline                     #TO BE MODIFIED BY USER, where the Pipeline Scripts will be
+export FSLGPUDIR=$BB_BIN_DIR/bb_diffusion_pipeline/bedpostx
+export MNI="$FSLDIR/data/standard/MNI152_T1_1mm.nii.gz"
+export MNI_mask="$FSLDIR/data/standard/MNI152_T1_1mm_brain_mask.nii.gz"
+export MNI_brain="$FSLDIR/data/standard/MNI152_T1_1mm_brain.nii.gz"
+export MNI_dir="$FSLDIR/data/standard"
+export templ="${BB_BIN_DIR}/templates"
+export PYTHONPATH=$BB_BIN_DIR/bb_python/bb_python:$PYTHONPATH
+export FSL_FIXDIR=/usr/local/fix                                            #TO BE MODIFIED BY USER. Better to have a freshly installed FIX and not use the one
+                                                                            #available in the released UKBiobank pipeline, as this ones seems to crash with post-2016 Matlab versions
+#SETUP LOGDIR
+export logDir=$BBDIR
+
+#SETUP SUBJECT
+export subject=$BBDIR
+#INCLUDE 3 MAIN BIOBANK DIRECTORIES IN PATH
+export PATH=$BB_BIN_DIR/bb_pipeline_tools/:$BB_BIN_DIR/bb_general_tools/:$PATH
+
+#ACTIVATE MATLAB'S RUNTIME COMPILER
+MCRROOT="/usr/local/mcr/v93"                                                #TO BE MODIFIED BY USER
+export LD_LIBRARY_PATH=${MCRROOT}/runtime/glnxa64:${MCRROOT}/bin/glnxa64:${MCRROOT}/sys/os/glnxa64:$LD_LIBRARY_PATH
+
+#SET ENVIRONMENT VARIABLE FOR NODDI_CUDIMOT
+export CUDIMOT="${BB_BIN_DIR}/bb_diffusion_pipeline/bb_NODDI_cuDIMOT"
+
+#ACTIVATE BIOBANK'S PYTHON VERSION
+. $BB_BIN_DIR/bb_python/bb_python/bin/activate

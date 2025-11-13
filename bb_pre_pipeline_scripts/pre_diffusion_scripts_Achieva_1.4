@@ -1,0 +1,63 @@
+#!/bin/sh
+
+FILENAME=`cat Achieva_file_name.txt`
+#Edit this variable so that it points to the directory where data is being kept
+FILE=/home/ppxan2/Harmonise3T/About_to_process/${FILENAME}
+
+imcp ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.nii.gz ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401_copy.nii.gz
+echo done image copy
+fslmerge -t ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401_merged.nii.gz ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.nii.gz ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401_copy.nii.gz
+echo done file merge
+rm ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.nii.gz
+mv ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401_merged.nii.gz ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.nii.gz
+echo done rename
+rm ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401_copy.nii.gz
+echo done delete
+
+#comenting these out becuase for 1.4 of Achieva the ordering of the files is okay
+#mkdir ${FILE}/volumes
+#echo done mkdir of volumes
+#mv ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.nii.gz ${FILE}/volumes
+#echo done mv of diff_AP.nii.gz to volumes
+#cd ${FILE}/volumes/
+#fslsplit *
+#cd ../..
+#echo current working directory is
+#echo `pwd`
+#echo done split
+
+#mv ${FILE}/volumes/vol0104.nii.gz ${FILE}/volumes/0vol0104.nii.gz
+#echo volumes reordred
+#rm ${FILE}/volumes/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.nii.gz
+#fslmerge -t ${FILE}/volumes/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.nii.gz ${FILE}/volumes/*
+#echo volumes merged
+#mv ${FILE}/volumes/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.nii.gz ${FILE}
+#echo volumes moved to directory above
+#rm -rf ${FILE}/volumes
+
+#cat ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bval | awk '{print $105}' > ${FILE}/temp
+#paste -d' ' ${FILE}/temp ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bval > ${FILE}/temp2
+#awk '{$106=""; print $0}' ${FILE}/temp2 > ${FILE}/done
+
+#rm ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bval ${FILE}/temp ${FILE}/temp2
+#mv ${FILE}/done ${FILE}/done2
+
+#printf "%.0f\n" `cat ${FILE}/done2` | xargs -n 106 > ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bval
+
+#rm ${FILE}/done2
+
+
+#cat ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bvec | awk '{print $105}' > ${FILE}/temp
+#paste -d' ' ${FILE}/temp ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bvec > ${FILE}/temp2
+#awk '{$106=""; print $0}' ${FILE}/temp2 > ${FILE}/done
+
+#rm ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bvec ${FILE}/temp ${FILE}/temp2
+
+#mv ${FILE}/done ${FILE}/diff_AP_DTI_Biobank_2mm_MB3S2_EPI_coil_echo1_401.bvec
+
+echo 0 0 > ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.bval
+echo bval values made for PA
+echo 0 0 >> ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.bvec
+echo 0 0 >> ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.bvec
+echo 0 0 >> ${FILE}/diff_PA_blip_DTI_Biobank_2mm_S2_HS0.8_EPI_coil_echo1_401.bvec
+echo bvec values made for PA direction

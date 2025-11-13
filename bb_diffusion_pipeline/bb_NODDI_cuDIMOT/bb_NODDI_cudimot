@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# Script name: bb_NODDI_cudimot
+#
+# Description: Script to generate the NODDI_cudimot outputs for dMRI
+#
+# Authors: Fidel Alfaro-Almagro, Stephen M. Smith & Mark Jenkinson
+#
+# Copyright 2017 University of Oxford
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+logDir=$PWD/$1/"/logs/"
+logFile=$logDir"bb_NODDI_cudimot__"$1"__"$$".log"
+
+exec 3>&1 4>&2 1> $logFile 2>&1
+
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_header 
+
+execPath=`dirname $0`
+
+cd $1
+
+SUBDIR=`pwd`
+SUB=`basename $SUBDIR`
+
+#Making directory structure
+mkdir -p $SUBDIR/dMRI/bb_CUDIMOT
+
+if [ -d $SUBDIR/dMRI/dMRI ] ; then
+
+
+    #Populating the pre cudimot directory with the necessary files required for it to run
+    cp $SUBDIR/dMRI/dMRI/data_ud.nii.gz $SUBDIR/dMRI/bb_CUDIMOT/data.nii.gz
+    cp -r $SUBDIR/dMRI/dMRI.bedpostX/* $SUBDIR/dMRI/bb_CUDIMOT
+
+    # Line which runs cuDIMOT
+    $BB_BIN_DIR/bb_diffusion_pipeline/bb_cuDIMOT/Pipeline_NODDI_Watson.sh $SUBDIR/dMRI/bb_CUDIMOT
+
+    mv $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/OD.nii.gz $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/NODDI_OD.nii.gz
+    mv $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/mean_fintra.nii.gz $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/NODDI_ICVF.nii.gz
+    mv $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/mean_fiso.nii.gz $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/NODDI_ISOVF.nii.gz
+
+    #Clean directory
+
+    mv $SUBDIR/dMRI/bb_CUDIMOT $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson
+    mv $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/bb_CUDIMOT $SUBDIR/dMRI/bb_CUDIMOT.NODDI_Watson/bb_pre_CUDIMOT
+
+    cd $SUBDIR/dMRI/TBSS/stats
+
+    dtifitDir=../../bb_CUDIMOT.NODDI_Watson
+
+    suffix="ICVF OD ISOVF"
+
+    for elem in $suffix ; do
+        $FSLDIR/bin/applywarp --rel -i $dtifitDir/NODDI_$elem -o all_${elem} -r $FSLDIR/data/standard/FMRIB58_FA_1mm -w ../FA/dti_FA_to_MNI_warp
+        $FSLDIR/bin/fslmaths all_${elem} -mas mean_FA_skeleton_mask all_${elem}_skeletonised
+        $FSLDIR/bin/fslstats -K ${FSLDIR}/data/atlases/JHU/JHU-ICBM-labels-1mm all_${elem}_skeletonised.nii.gz -M >JHUrois_${elem}.txt
+    done
+
+fi;
+
+cd $ANALROOT
+
+. $BB_BIN_DIR/bb_pipeline_tools/bb_set_footer 
+
